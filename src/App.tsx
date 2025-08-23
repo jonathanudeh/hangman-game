@@ -1,3 +1,4 @@
+import LoseScreen from "./components/screens/GameOverScreen";
 import HomeScreen from "./components/screens/HomeScreen";
 import LoadingScreen from "./components/screens/LoadingScreen";
 import WinScreen from "./components/screens/WinScreen";
@@ -8,6 +9,7 @@ function App() {
       {/* <LoadingScreen /> */}
       {/* <HomeScreen /> */}
       <WinScreen />
+      {/* <LoseScreen /> */}
     </div>
   );
 }
