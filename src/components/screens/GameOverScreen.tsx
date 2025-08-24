@@ -24,14 +24,6 @@ function LoseScreen() {
             src="/src/assets/images/hangman-parts/hang-rope.svg"
             alt="A hanging rope"
             className="w-15 md:w-13"
-            // animate={{
-            //   rotate: [0, 2, -2, 1, -1, 0],
-            // }}
-            // transition={{
-            //   duration: 4,
-            //   repeat: Infinity,
-            //   ease: "easeInOut",
-            // }}
           />
           <motion.img
             src="/src/assets/images/hangman-parts/lose-man.svg"
