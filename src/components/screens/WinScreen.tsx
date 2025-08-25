@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
+import { useHangman } from "../../contexts/HangManContext";
 
 function WinScreen() {
+  const { currentWord } = useHangman();
+
   // Confetti-like particles animation
   const confettiVariants = {
     hidden: {
@@ -117,7 +120,7 @@ function WinScreen() {
               ease: "easeInOut",
             }}
           >
-            APPLE
+            {currentWord.toUpperCase()}
           </motion.span>
         </motion.span>
 

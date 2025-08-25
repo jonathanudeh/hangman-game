@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
+import { useHangman } from "../../contexts/HangManContext";
 
 function LoseScreen() {
+  const { currentWord } = useHangman();
   return (
     <motion.div
       className="w-full h-screen flex flex-col items-center p-2 pt-0"
@@ -55,7 +57,7 @@ function LoseScreen() {
             x: { delay: 1.2, duration: 0.5 },
           }}
         >
-          APPLE
+          {currentWord.toLocaleUpperCase()}
         </motion.span>
 
         <motion.div

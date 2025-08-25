@@ -1,11 +1,22 @@
 import { motion } from "framer-motion";
 import VirtualKeyBoard from "../VirtualKeyBoard";
+import { useHangman } from "../../contexts/HangManContext";
 
 function GameScreen() {
+  const { currentWord, wrongGuesses, maxWrongGuesses, guessedLetters } =
+    useHangman();
+
+  const shouldRevealLetter = (letter: string) => {
+    return guessedLetters.includes(letter.toLowerCase());
+  };
+
   return (
     <div className="flex flex-col gap-20 md:gap-0 md:justify-between w-full h-screen">
       <div className="flex justify-between px-4">
-        <p className="text-black font-bold text-2xl mt-1">03/06</p>
+        <p className="text-black font-bold text-2xl mt-1">
+          {" "}
+          {String(maxWrongGuesses)}/{String(wrongGuesses)}
+        </p>
 
         <motion.div
           className="flex flex-col items-center"
@@ -58,7 +69,7 @@ function GameScreen() {
       </div>
 
       <div className="flex gap-2 items-center justify-center">
-        {"APPLE".split("").map((letter, index) => (
+        {currentWord.split("").map((letter, index) => (
           <motion.div
             key={index}
             className="w-12 h-16 border-b-4 border-amber-600 flex items-center justify-center"
@@ -75,7 +86,7 @@ function GameScreen() {
               }}
               transition={{ duration: 0.3 }}
             >
-              {letter.toUpperCase()}
+              {shouldRevealLetter(letter) ? letter.toUpperCase() : ""}
             </motion.span>
           </motion.div>
         ))}
