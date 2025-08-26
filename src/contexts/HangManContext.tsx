@@ -27,7 +27,13 @@ interface HangmanContextType extends GameState {
 type GameAction =
   | { type: "GUESS_LETTER"; payload: string }
   | { type: "NEW_GAME"; payload: { word: string; hint: string } }
-  | { type: "SET_LOADING" };
+  | { type: "SET_DIFFICULTY"; payload: "easy" | "medium" | "hard" }
+  | { type: "SET_LOADING" }
+  | { type: "GET_HINT" }
+  | { type: "RESET_GAME" }
+  | { type: "SET_LOADING" }
+  | { type: "GAME_WON" }
+  | { type: "GAME_LOST" };
 
 const initialState: GameState = {
   gameStatus: "loading",
@@ -109,6 +115,33 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         wrongGuesses: 0,
         lives: 6,
         gameStatus: "playing",
+      };
+
+    case "SET_DIFFICULTY":
+      return {
+        ...state,
+        difficulty: action.payload,
+        maxWrongGuesses:
+          action.payload === "easy" ? 6 : action.payload === "medium" ? 5 : 4,
+        lives:
+          action.payload === "easy" ? 6 : action.payload === "medium" ? 5 : 4,
+      };
+
+    case "GET_HINT":
+      // Hint costs 1 life
+      return {
+        ...state,
+        lives: Math.max(0, state.lives - 1),
+      };
+
+    case "RESET_GAME":
+      return {
+        ...state,
+        gameStatus: "playing",
+        currentWord: "",
+        difficulty: state.difficulty,
+        level: state.level,
+        score: 0,
       };
 
     case "SET_LOADING":

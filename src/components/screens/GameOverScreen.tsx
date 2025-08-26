@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useHangman } from "../../contexts/HangManContext";
 
 function LoseScreen() {
-  const { currentWord } = useHangman();
+  const { currentWord, dispatch } = useHangman();
   return (
     <motion.div
       className="w-full h-screen flex flex-col items-center p-2 pt-0"
@@ -97,6 +97,7 @@ function LoseScreen() {
                 transition: { duration: 0.2 },
               }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => dispatch({ type: "RESET_GAME" })}
             >
               <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
                 <span className="text-white font-bold">Restart</span>
@@ -113,6 +114,7 @@ function LoseScreen() {
                 transition: { duration: 0.2 },
               }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => {}}
             >
               <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
                 <span className="text-white font-bold">Difficulty</span>
