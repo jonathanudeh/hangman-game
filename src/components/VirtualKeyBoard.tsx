@@ -2,7 +2,9 @@ import { motion } from "framer-motion";
 import { useHangman } from "../contexts/HangManContext";
 
 function VirtualKeyBoard() {
-  const { guessedLetters, currentWord, dispatch } = useHangman();
+  const { guessedLetters, currentWord, hint, showHint, dispatch } =
+    useHangman();
+
   const keyboardRows = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
     ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
@@ -45,6 +47,15 @@ function VirtualKeyBoard() {
           ))}
         </motion.div>
       ))}
+
+      <button
+        className={`bg-[url('/src/assets/images/icons/hint-frame.svg')]  bg-center bg-no-repeat w-48 flex flex-wrap text-wrap items-center justify-center text-white  mt-3 cursor-pointer ${
+          showHint ? "text-xs p-5 text-center" : "text-2xl h-15"
+        }`}
+        onClick={() => dispatch({ type: "GET_HINT" })}
+      >
+        {showHint ? hint : "HINT"}
+      </button>
     </div>
   );
 }

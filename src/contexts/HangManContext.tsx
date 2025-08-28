@@ -8,7 +8,7 @@ import React, {
 import { fetchWordFromWordnik, getStaticWord } from "../FetchFunc";
 
 interface GameState {
-  gameStatus: "playing" | "won" | "lost" | "loading";
+  gameStatus: "home" | "playing" | "won" | "lost" | "loading" | "difficulty";
   currentWord: string;
   guessedLetters: string[];
   wrongGuesses: number;
@@ -16,8 +16,9 @@ interface GameState {
   level: number;
   score: number;
   hint: string;
+  showHint: boolean;
   lives: number;
-  difficulty: "easy" | "medium" | "hard";
+  difficulty: "easy" | "normal" | "hard";
 }
 
 interface HangmanContextType extends GameState {
@@ -25,9 +26,13 @@ interface HangmanContextType extends GameState {
 }
 
 type GameAction =
+  | {
+      type: "BUTTON_NAV";
+      payload: "home" | "playing" | "won" | "lost" | "loading" | "difficulty";
+    }
   | { type: "GUESS_LETTER"; payload: string }
   | { type: "NEW_GAME"; payload: { word: string; hint: string } }
-  | { type: "SET_DIFFICULTY"; payload: "easy" | "medium" | "hard" }
+  | { type: "SET_DIFFICULTY"; payload: "easy" | "normal" | "hard" }
   | { type: "SET_LOADING" }
   | { type: "GET_HINT" }
   | { type: "RESET_GAME" }
@@ -36,7 +41,7 @@ type GameAction =
   | { type: "GAME_LOST" };
 
 const initialState: GameState = {
-  gameStatus: "loading",
+  gameStatus: "home",
   currentWord: "",
   guessedLetters: [],
   wrongGuesses: 0,
@@ -44,12 +49,39 @@ const initialState: GameState = {
   level: 1,
   score: 0,
   hint: "",
+  showHint: false,
   lives: 6,
   difficulty: "easy",
 };
 
 const reducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
+    case "BUTTON_NAV":
+      return { ...state, gameStatus: action.payload };
+
+    case "NEW_GAME":
+      console.log(state.currentWord);
+      return {
+        ...state,
+        currentWord: action.payload.word,
+        hint: action.payload.hint,
+        guessedLetters: [],
+        wrongGuesses: 0,
+        lives: 6,
+        gameStatus: "playing",
+      };
+
+    case "RESET_GAME":
+      return {
+        ...state,
+        gameStatus: "playing",
+        guessedLetters: [],
+        difficulty: state.difficulty,
+        level: state.level,
+        wrongGuesses: 0,
+        score: 0,
+      };
+
     case "GUESS_LETTER": {
       const letter = action.payload.toLowerCase();
 
@@ -84,7 +116,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         const basePoints =
           state.difficulty === "easy"
             ? 10
-            : state.difficulty === "medium"
+            : state.difficulty === "normal"
             ? 20
             : 30;
         const bonusPoints = newLives * 5;
@@ -105,44 +137,30 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       };
     }
 
-    case "NEW_GAME":
-      console.log(state.currentWord);
-      return {
-        ...state,
-        currentWord: action.payload.word,
-        hint: action.payload.hint,
-        guessedLetters: [],
-        wrongGuesses: 0,
-        lives: 6,
-        gameStatus: "playing",
-      };
-
     case "SET_DIFFICULTY":
       return {
         ...state,
         difficulty: action.payload,
         maxWrongGuesses:
-          action.payload === "easy" ? 6 : action.payload === "medium" ? 5 : 4,
+          action.payload === "easy" ? 6 : action.payload === "normal" ? 5 : 4,
         lives:
-          action.payload === "easy" ? 6 : action.payload === "medium" ? 5 : 4,
+          action.payload === "easy" ? 6 : action.payload === "normal" ? 5 : 4,
       };
 
-    case "GET_HINT":
+    case "GET_HINT": {
+      if (state.hint === "" || state.hint === undefined || state.showHint)
+        return state;
+
       // Hint costs 1 life
-      return {
-        ...state,
-        lives: Math.max(0, state.lives - 1),
-      };
+      const newWrongGuesses = state.wrongGuesses + 1;
+      console.log(newWrongGuesses);
 
-    case "RESET_GAME":
       return {
         ...state,
-        gameStatus: "playing",
-        currentWord: "",
-        difficulty: state.difficulty,
-        level: state.level,
-        score: 0,
+        wrongGuesses: newWrongGuesses,
+        showHint: state.hint !== "" || state.hint !== undefined ? true : false,
       };
+    }
 
     case "SET_LOADING":
       return {

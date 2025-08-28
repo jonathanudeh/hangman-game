@@ -3,6 +3,7 @@ import { useHangman } from "../../contexts/HangManContext";
 
 function LoseScreen() {
   const { currentWord, dispatch } = useHangman();
+
   return (
     <motion.div
       className="w-full h-screen flex flex-col items-center p-2 pt-0"
@@ -104,7 +105,7 @@ function LoseScreen() {
               </div>
             </motion.button>
 
-            <motion.button
+            {/* <motion.button
               className="cursor-pointer"
               initial={{ x: 100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -114,12 +115,14 @@ function LoseScreen() {
                 transition: { duration: 0.2 },
               }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => {}}
+              onClick={() =>
+                dispatch({ type: "BUTTON_NAV", payload: "difficulty" })
+              }
             >
               <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
                 <span className="text-white font-bold">Difficulty</span>
               </div>
-            </motion.button>
+            </motion.button> */}
 
             <motion.div
               className="relative flex items-center justify-between w-2/3 md:w-1/2 h-20 -mt-4"
@@ -139,6 +142,9 @@ function LoseScreen() {
                   src="/src/assets/images/icons/home-icon.svg"
                   alt="Home icon"
                   className="w-15 h-15 "
+                  onClick={() =>
+                    dispatch({ type: "BUTTON_NAV", payload: "home" })
+                  }
                 />
               </button>
               <button className="cursor-pointer">

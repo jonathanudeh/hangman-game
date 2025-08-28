@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
+import { useHangman } from "../../contexts/HangManContext";
 
 function HomeScreen() {
+  const { difficulty, level, dispatch } = useHangman();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -17,7 +20,7 @@ function HomeScreen() {
         className="flex  justify-between"
       >
         <div className="bg-[url('/src/assets/images/icons/level-board.svg')] bg-contain bg-center bg-no-repeat w-24 h-12 flex items-center justify-center">
-          <span className="text-white font-bold">Level 1</span>
+          <span className="text-white font-bold">Level {level}</span>
         </div>
         <div className="flex flex-col">
           <motion.button
@@ -66,6 +69,7 @@ function HomeScreen() {
           animate={{ scale: 1 }}
           transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
           className="cursor-pointer"
+          onClick={() => dispatch({ type: "BUTTON_NAV", payload: "loading" })}
         >
           <img
             src="/src/assets/images/icons/play.svg"
@@ -79,7 +83,7 @@ function HomeScreen() {
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="flex items-center justify-between"
+        className="flex items-center justify-between px-2"
       >
         <motion.button
           whileHover={{ scale: 1.1 }}
@@ -92,9 +96,19 @@ function HomeScreen() {
             className="w-15 h-15"
           />
         </motion.button>
-        <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-24 h-12 flex items-center justify-center">
-          <span className="text-white font-bold">Easy ""</span>
-        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-24 h-10 flex items-center justify-center cursor-pointer"
+          onClick={() =>
+            dispatch({ type: "BUTTON_NAV", payload: "difficulty" })
+          }
+        >
+          <span className="text-white font-bold">
+            {difficulty.toUpperCase()}
+          </span>
+        </motion.button>
       </motion.div>
     </motion.div>
   );
