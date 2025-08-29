@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
 import VirtualKeyBoard from "../VirtualKeyBoard";
 import { useHangman } from "../../contexts/HangManContext";
+import { useEffect, useState } from "react";
+import HelpModal from "../modals/HelpModal";
 
 function GameScreen() {
+  const [isHelpSHowing, setIsHelpShowing] = useState(false);
   const { currentWord, wrongGuesses, maxWrongGuesses, guessedLetters } =
     useHangman();
 
@@ -10,8 +13,21 @@ function GameScreen() {
     return guessedLetters.includes(letter.toLowerCase());
   };
 
+  useEffect(
+    function () {
+      if (isHelpSHowing) {
+        document.body.style.overflow = "hidden";
+      }
+
+      return () => {
+        document.body.style.overflow = "auto";
+      };
+    },
+    [isHelpSHowing]
+  );
+
   return (
-    <div className="flex flex-col gap-20 md:gap-0 md:justify-between w-full h-screen">
+    <div className="relative flex flex-col gap-20 md:gap-0 md:justify-between w-full h-screen">
       <div className="flex justify-between px-4">
         <p className="text-black font-bold text-2xl mt-1">
           {" "}
@@ -51,7 +67,10 @@ function GameScreen() {
         </motion.div>
 
         <div className="flex flex-col  mt-1">
-          <button className="cursor-pointer">
+          <button
+            className="cursor-pointer"
+            onClick={() => setIsHelpShowing(true)}
+          >
             <img
               src="/src/assets/images/icons/help-icon.svg"
               alt="Help button"
@@ -60,7 +79,7 @@ function GameScreen() {
           </button>
           <button className="cursor-pointer">
             <img
-              src="/src/assets/images/icons/help-icon.svg"
+              src="/src/assets/images/icons/pause-btn.svg"
               alt="Pause button"
               className="w-15 h-15"
             />
@@ -93,6 +112,8 @@ function GameScreen() {
       </div>
 
       <VirtualKeyBoard />
+
+      {isHelpSHowing && <HelpModal onIsHelpShowing={setIsHelpShowing} />}
     </div>
   );
 }

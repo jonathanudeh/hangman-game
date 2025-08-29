@@ -45,7 +45,7 @@ function LoseScreen() {
         </motion.div>
 
         <motion.span
-          className="w-60 text-black font-bold text-3xl text-center tracking-[2.2rem]"
+          className="w-auto text-black font-bold text-3xl text-center tracking-[2.2rem]"
           initial={{ opacity: 0, y: 20 }}
           animate={{
             opacity: 1,
@@ -87,7 +87,7 @@ function LoseScreen() {
             YOU LOSE !
           </motion.div>
 
-          <div className="flex flex-col items-center gap-5 pt-3 md:justify- w-full h-6/7 border-t-2 border-[#FFB01C]">
+          <div className="flex flex-col items-center gap-5 pt-3 justify-around w-full h-6/7 border-t-2 border-[#FFB01C]">
             <motion.button
               className="cursor-pointer"
               initial={{ x: -100, opacity: 0 }}
@@ -125,19 +125,27 @@ function LoseScreen() {
             </motion.button> */}
 
             <motion.div
-              className="relative flex items-center justify-between w-2/3 md:w-1/2 h-20 -mt-4"
+              className="relative flex items-center justify-between w-2/3 md:w-1/2 h-30 -mt-4"
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.9, duration: 0.5 }}
             >
-              <button className="cursor-pointer">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="cursor-pointer -mt-10"
+              >
                 <img
                   src="/src/assets/images/icons/help-icon.svg"
                   alt="Help icon"
                   className="w-15 h-15"
                 />
-              </button>
-              <button className="cursor-pointer absolute top-8 left-1/2 -translate-x-1/2 z-20">
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="cursor-pointer absolute top-15 left-1/2 -translate-x-1/2 z-20"
+              >
                 <img
                   src="/src/assets/images/icons/home-icon.svg"
                   alt="Home icon"
@@ -146,14 +154,18 @@ function LoseScreen() {
                     dispatch({ type: "BUTTON_NAV", payload: "home" })
                   }
                 />
-              </button>
-              <button className="cursor-pointer">
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="cursor-pointer -mt-10"
+              >
                 <img
                   src="/src/assets/images/icons/settings.svg"
                   alt="settings icon"
                   className="w-15 h-15"
                 />
-              </button>
+              </motion.button>
             </motion.div>
           </div>
         </motion.div>

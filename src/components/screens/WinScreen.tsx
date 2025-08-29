@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useHangman } from "../../contexts/HangManContext";
 
 function WinScreen() {
-  const { currentWord } = useHangman();
+  const { currentWord, level } = useHangman();
 
   // Confetti-like particles animation
   const confettiVariants = {
@@ -51,7 +51,7 @@ function WinScreen() {
 
       <button className="cursor-pointer self-end">
         <img
-          src="/src/assets/images/icons/settings.svg"
+          src="/src/assets/images/icons/help-icon.svg"
           alt=""
           className="w-15 h-15"
         />
@@ -90,7 +90,7 @@ function WinScreen() {
         </motion.div>
 
         <motion.span
-          className="w-60 text-black font-bold text-3xl text-center tracking-[2.2rem]"
+          className="w-auto text-black font-bold text-3xl text-center tracking-[2.2rem]"
           initial={{ opacity: 0, y: 30, scale: 0.8 }}
           animate={{
             opacity: 1,
@@ -157,7 +157,7 @@ function WinScreen() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.5 }}
             >
-              Level: <span>01</span>
+              Level: <span>{level}</span>
             </motion.div>
             <motion.div
               className="bg-[#B0670B] w-70 h-14 rounded-lg text-white font-bold text-2xl flex items-center justify-between px-6"

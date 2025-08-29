@@ -36,6 +36,7 @@ type GameAction =
   | { type: "SET_LOADING" }
   | { type: "GET_HINT" }
   | { type: "RESET_GAME" }
+  | { type: "NEXT_GAME" }
   | { type: "SET_LOADING" }
   | { type: "GAME_WON" }
   | { type: "GAME_LOST" };
@@ -67,14 +68,27 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         hint: action.payload.hint,
         guessedLetters: [],
         wrongGuesses: 0,
-        lives: 6,
         gameStatus: "playing",
+        showHint: false,
+        maxWrongGuesses:
+          state.difficulty === "easy"
+            ? 6
+            : state.difficulty === "normal"
+            ? 5
+            : 4,
+        lives:
+          state.difficulty === "easy"
+            ? 6
+            : state.difficulty === "normal"
+            ? 5
+            : 4,
       };
 
     case "RESET_GAME":
       return {
         ...state,
         gameStatus: "playing",
+        showHint: false,
         guessedLetters: [],
         difficulty: state.difficulty,
         level: state.level,
@@ -136,6 +150,27 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         level: newLevel,
       };
     }
+
+    case "NEXT_GAME":
+      return {
+        ...state,
+        gameStatus: "loading",
+        level: state.level + 1,
+        showHint: false,
+        wrongGuesses: 0,
+        maxWrongGuesses:
+          state.difficulty === "easy"
+            ? 6
+            : state.difficulty === "normal"
+            ? 5
+            : 4,
+        lives:
+          state.difficulty === "easy"
+            ? 6
+            : state.difficulty === "normal"
+            ? 5
+            : 4,
+      };
 
     case "SET_DIFFICULTY":
       return {

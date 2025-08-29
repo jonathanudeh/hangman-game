@@ -9,20 +9,24 @@ function HomeScreen() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, staggerChildren: 0.1 }}
-      className="w-full max-h-screen h-screen
-      flex flex-col gap-10 md:gap-3
+      className="relative w-full max-h-screen h-screen
+      flex flex-col gap-10 justify-around md:gap-3
     "
+      style={{
+        scrollbarWidth: "none" /* Firefox */,
+        msOverflowStyle: "none" /* IE/Edge */,
+      }}
     >
       <motion.div
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="flex  justify-between"
+        className="flex  justify-between pl-4"
       >
         <div className="bg-[url('/src/assets/images/icons/level-board.svg')] bg-contain bg-center bg-no-repeat w-24 h-12 flex items-center justify-center">
           <span className="text-white font-bold">Level {level}</span>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col pr-4">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -40,7 +44,7 @@ function HomeScreen() {
             className="cursor-pointer"
           >
             <img
-              src="/src/assets/images/icons/settings.svg"
+              src="/src/assets/images/icons/sound-icon.svg"
               alt="Settings"
               className="w-15 h-15"
             />
