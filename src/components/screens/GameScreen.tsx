@@ -3,9 +3,16 @@ import VirtualKeyBoard from "../VirtualKeyBoard";
 import { useHangman } from "../../contexts/HangManContext";
 import { useEffect, useState } from "react";
 import HelpModal from "../modals/HelpModal";
+import PauseModal from "../modals/PauseModal";
+import ConfirmModal from "../modals/ConfirmModal";
+import SettingsModal from "../modals/SettingsModal";
 
 function GameScreen() {
   const [isHelpSHowing, setIsHelpShowing] = useState(false);
+  const [pause, setPause] = useState(false);
+  const [exit, setExit] = useState(false);
+  const [settings, setIsSetthings] = useState(false);
+
   const { currentWord, wrongGuesses, maxWrongGuesses, guessedLetters } =
     useHangman();
 
@@ -15,7 +22,7 @@ function GameScreen() {
 
   useEffect(
     function () {
-      if (isHelpSHowing) {
+      if (isHelpSHowing || pause) {
         document.body.style.overflow = "hidden";
       }
 
@@ -23,7 +30,7 @@ function GameScreen() {
         document.body.style.overflow = "auto";
       };
     },
-    [isHelpSHowing]
+    [isHelpSHowing, pause]
   );
 
   return (
@@ -77,7 +84,7 @@ function GameScreen() {
               className="w-15 h-15"
             />
           </button>
-          <button className="cursor-pointer">
+          <button className="cursor-pointer" onClick={() => setPause(true)}>
             <img
               src="/src/assets/images/icons/pause-btn.svg"
               alt="Pause button"
@@ -114,6 +121,16 @@ function GameScreen() {
       <VirtualKeyBoard />
 
       {isHelpSHowing && <HelpModal onIsHelpShowing={setIsHelpShowing} />}
+      {pause && (
+        <PauseModal
+          onPause={setPause}
+          onExit={setExit}
+          onIsHelpShowing={setIsHelpShowing}
+          onSettings={setIsSetthings}
+        />
+      )}
+      {settings && <SettingsModal onSettings={setIsSetthings} />}
+      {exit && <ConfirmModal onExit={setExit} onPause={setPause} />}
     </div>
   );
 }

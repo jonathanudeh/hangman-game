@@ -27,11 +27,11 @@ function HelpModal({ onIsHelpShowing }: ChildComponentProps) {
         <div
           className="bg-red- w-full h-2/2 p-4 text-white overflow-y-scroll flex flex-col gap-3"
           style={{
-            scrollbarWidth: "none" /* Firefox */,
-            msOverflowStyle: "none" /* IE/Edge */,
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
           }}
         >
-          <h1 className="text-2xl">How to Play</h1>
+          <h1 className="text-2xl font-bold">How to Play</h1>
           <p>
             Welcome to the Hangman game! Who has not played this game in school?
           </p>
@@ -41,7 +41,7 @@ function HelpModal({ onIsHelpShowing }: ChildComponentProps) {
             If you can't find a word, don't worry, you can use hints that will
             help you discover the word.
           </p>{" "}
-          <h1 className="text-2xl">WAIT!, THERE'S MORE!</h1>
+          <h1 className="text-2xl font-bold">WAIT!, THERE'S MORE!</h1>
           <p>
             There are three game modes which is you can change according to your
             skill level.
@@ -50,7 +50,7 @@ function HelpModal({ onIsHelpShowing }: ChildComponentProps) {
             The difficulty is increasing step by step according to levels. You
             can up your level by win the game five times.
           </p>
-          <h2 className="text-xl">Just one more thing</h2>
+          <h2 className="text-xl font-bold">Just one more thing</h2>
           <p>Enjoy !!!</p>
         </div>
       </div>

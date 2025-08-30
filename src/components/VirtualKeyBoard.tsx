@@ -51,7 +51,7 @@ function VirtualKeyBoard() {
       <button
         className={`bg-[url('/src/assets/images/icons/hint-frame.svg')]  bg-center bg-no-repeat w-48 flex flex-wrap text-wrap items-center justify-center text-white  mt-3 cursor-pointer ${
           showHint ? "text-xs p-5 text-center" : "text-2xl h-15"
-        }`}
+        } overflow-scroll`}
         onClick={() => dispatch({ type: "GET_HINT" })}
       >
         {showHint ? hint : "HINT"}

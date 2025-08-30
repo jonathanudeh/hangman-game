@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
 import { useHangman } from "../../contexts/HangManContext";
+import { useState } from "react";
+import SettingsModal from "../modals/SettingsModal";
 
 function HomeScreen() {
+  const [settings, setIsSetthings] = useState(false);
   const { difficulty, level, dispatch } = useHangman();
 
   return (
@@ -13,8 +16,8 @@ function HomeScreen() {
       flex flex-col gap-10 justify-around md:gap-3
     "
       style={{
-        scrollbarWidth: "none" /* Firefox */,
-        msOverflowStyle: "none" /* IE/Edge */,
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
       }}
     >
       <motion.div
@@ -31,6 +34,7 @@ function HomeScreen() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             className="cursor-pointer"
+            onClick={() => setIsSetthings(true)}
           >
             <img
               src="/src/assets/images/icons/settings.svg"
@@ -114,6 +118,8 @@ function HomeScreen() {
           </span>
         </motion.button>
       </motion.div>
+
+      {settings && <SettingsModal onSettings={setIsSetthings} />}
     </motion.div>
   );
 }

@@ -1,11 +1,14 @@
 import { motion } from "framer-motion";
 import { useHangman } from "../../contexts/HangManContext";
+import { useState } from "react";
+import SettingsModal from "../modals/SettingsModal";
 
 function DifficultyScreen() {
+  const [settings, setIsSetthings] = useState(false);
   const { difficulty, dispatch } = useHangman();
 
   return (
-    <div className="w-full h-screen flex flex-col ">
+    <div className="w-full h-screen flex flex-col">
       <motion.div
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -27,6 +30,7 @@ function DifficultyScreen() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="cursor-pointer"
+            onClick={() => setIsSetthings(true)}
           >
             <img
               src="/src/assets/images/icons/settings.svg"
@@ -92,6 +96,8 @@ function DifficultyScreen() {
           </span>
         </button>
       </div>
+
+      {settings && <SettingsModal onSettings={setIsSetthings} />}
     </div>
   );
 }
