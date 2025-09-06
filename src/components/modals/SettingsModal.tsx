@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { useHangman } from "../../contexts/HangManContext";
 import type { Dispatch, SetStateAction } from "react";
 
@@ -7,7 +6,7 @@ interface ChildComponentProps {
 }
 
 function SettingsModal({ onSettings }: ChildComponentProps) {
-  const { dispatch } = useHangman();
+  const { sound, music, dispatch } = useHangman();
 
   return (
     <div className="fixed w-full h-screen flex items-center justify-center z-15">
@@ -15,8 +14,8 @@ function SettingsModal({ onSettings }: ChildComponentProps) {
       <div className="absolute w-full h-screen inset-0 bg-black/40 z-16"></div>
 
       {/* main modal */}
-      <div className="bg-[#C47C31] w-80 h-62 md:w-100 md:h-70 flex-col items-center justify-start rounded-2xl z-17">
-        <div className="relative bg-[#E68929] text-white w-full h-1/4 flex items-center justify-center border-b-2 border-b-[#B0670B] p-2 text-3xl font-bold rounded-t-2xl">
+      <div className="bg-[#C47C31] w-70 h-52 md:w-100 md:h-70 flex-col items-center justify-start rounded-2xl z-17">
+        <div className="relative bg-[#E68929] text-white w-full h-1/4 flex items-center justify-center border-b-2 border-b-[#B0670B] p-2 text-xl font-bold rounded-t-2xl">
           SETTINGS
           <button
             className="absolute right-4 cursor-pointer"
@@ -30,39 +29,57 @@ function SettingsModal({ onSettings }: ChildComponentProps) {
           </button>
         </div>
 
-        <div className="w-full h-3/4 flex flex-col items-center justify-around">
-          <div className="flex flex-col items-center justify-center gap-5 h-35">
-            <motion.button
-              className="cursor-pointer"
-              initial={{ x: -100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.5 }}
-              whileHover={{
-                scale: 1.05,
-                transition: { duration: 0.2 },
-              }}
-              whileTap={{ scale: 0.95 }}
+        <div className="w-full h-3/4 flex flex-col items-center justify-around p-4">
+          {/* sound control */}
+          <div className="w-full flex justify-between">
+            <div className="flex gap-2 text-white font-bold">
+              <img
+                src="/src/assets/images/icons/settings-sound-icon.svg"
+                alt="Sound icon"
+              />
+              <span>Sound</span>
+            </div>
+            <button
+              className={`relative border-2 border-white w-20 flex items-center  text-white text-xs font-bold px-1 ${
+                sound
+                  ? "bg-[#147B05] justify-start"
+                  : "bg-[#803B09] justify-end"
+              }`}
+              onClick={() => dispatch({ type: "SET_SOUND" })}
             >
-              <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
-                <span className="text-white font-bold">YES</span>
-              </div>
-            </motion.button>
+              <div
+                className={`w-10 h-full bg-yellow-400 absolute ${
+                  sound ? "right-0" : "left-0"
+                }`}
+              ></div>
+              <span>{sound ? "ON" : "OFF"}</span>
+            </button>
+          </div>
 
-            <motion.button
-              className="cursor-pointer"
-              initial={{ x: -100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.5 }}
-              whileHover={{
-                scale: 1.05,
-                transition: { duration: 0.2 },
-              }}
-              whileTap={{ scale: 0.95 }}
+          {/* music control */}
+          <div className="w-full flex justify-between">
+            <div className="flex gap-2 text-white font-bold ">
+              <img
+                src="/src/assets/images/icons/music-icon.svg"
+                alt="Sound icon"
+              />
+              <span>Music</span>
+            </div>
+            <button
+              className={`relative border-2 border-white w-20 flex items-center  text-white text-xs font-bold px-1 ${
+                music
+                  ? "bg-[#147B05] justify-start"
+                  : "bg-[#803B09] justify-end"
+              }`}
+              onClick={() => dispatch({ type: "SET_MUSIC" })}
             >
-              <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
-                <span className="text-white font-bold">NO</span>
-              </div>
-            </motion.button>
+              <div
+                className={`w-10 h-full bg-yellow-400  absolute ${
+                  music ? "right-0" : "left-0"
+                }`}
+              ></div>
+              <span>{music ? "ON" : "OFF"}</span>
+            </button>
           </div>
         </div>
         {/*  */}

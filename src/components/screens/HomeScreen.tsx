@@ -2,10 +2,18 @@ import { motion } from "framer-motion";
 import { useHangman } from "../../contexts/HangManContext";
 import { useState } from "react";
 import SettingsModal from "../modals/SettingsModal";
+import HelpModal from "../modals/HelpModal";
 
 function HomeScreen() {
   const [settings, setIsSetthings] = useState(false);
-  const { difficulty, level, dispatch } = useHangman();
+  const [isHelpSHowing, setIsHelpShowing] = useState(false);
+  const { sound, difficulty, level, dispatch } = useHangman();
+
+  function handlePlayClick() {
+    //reset any previous game state and start fresh
+    dispatch({ type: "RESET_TO_HOME" });
+    dispatch({ type: "BUTTON_NAV", payload: "loading" });
+  }
 
   return (
     <motion.div
@@ -46,9 +54,14 @@ function HomeScreen() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             className="cursor-pointer"
+            onClick={() => dispatch({ type: "SET_SOUND" })}
           >
             <img
-              src="/src/assets/images/icons/sound-icon.svg"
+              src={`${
+                sound
+                  ? "/src/assets/images/icons/sound-icon.svg"
+                  : "/src/assets/images/icons/mute-icon.svg"
+              }`}
               alt="Settings"
               className="w-15 h-15"
             />
@@ -77,7 +90,7 @@ function HomeScreen() {
           animate={{ scale: 1 }}
           transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
           className="cursor-pointer"
-          onClick={() => dispatch({ type: "BUTTON_NAV", payload: "loading" })}
+          onClick={handlePlayClick}
         >
           <img
             src="/src/assets/images/icons/play.svg"
@@ -97,6 +110,7 @@ function HomeScreen() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           className="cursor-pointer"
+          onClick={() => setIsHelpShowing(true)}
         >
           <img
             src="/src/assets/images/icons/help.svg"
@@ -120,6 +134,7 @@ function HomeScreen() {
       </motion.div>
 
       {settings && <SettingsModal onSettings={setIsSetthings} />}
+      {isHelpSHowing && <HelpModal onIsHelpShowing={setIsHelpShowing} />}
     </motion.div>
   );
 }

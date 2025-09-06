@@ -1,8 +1,13 @@
 import { motion } from "framer-motion";
 import { useHangman } from "../../contexts/HangManContext";
+import HelpModal from "../modals/HelpModal";
+import { useState } from "react";
+import NextLevelModal from "../modals/NextLevelModal";
 
 function WinScreen() {
-  const { currentWord, level } = useHangman();
+  const [isHelpSHowing, setIsHelpShowing] = useState(false);
+  const [nextLevelModal, setNextLevelModal] = useState(false);
+  const { currentWord, level, score } = useHangman();
 
   // Confetti-like particles animation
   const confettiVariants = {
@@ -49,7 +54,10 @@ function WinScreen() {
         />
       ))}
 
-      <button className="cursor-pointer self-end">
+      <button
+        className="cursor-pointer self-end"
+        onClick={() => setIsHelpShowing(true)}
+      >
         <img
           src="/src/assets/images/icons/help-icon.svg"
           alt=""
@@ -105,6 +113,7 @@ function WinScreen() {
           }}
         >
           <motion.span
+            className="text-center"
             animate={{
               textShadow: [
                 "0 0 10px #FFD700",
@@ -165,7 +174,7 @@ function WinScreen() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.5 }}
             >
-              Progress: <span>40%</span>
+              Progress: <span>{score}</span>
             </motion.div>
 
             <motion.button
@@ -184,6 +193,7 @@ function WinScreen() {
                 transition: { duration: 0.2 },
               }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => setNextLevelModal(true)}
             >
               <img
                 src="/src/assets/images/hangman-parts/win-next-btn.svg"
@@ -194,6 +204,9 @@ function WinScreen() {
           </div>
         </motion.div>
       </div>
+
+      {isHelpSHowing && <HelpModal onIsHelpShowing={setIsHelpShowing} />}
+      {nextLevelModal && <NextLevelModal onNextLevel={setNextLevelModal} />}
     </div>
   );
 }

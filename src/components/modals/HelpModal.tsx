@@ -10,7 +10,7 @@ function HelpModal({ onIsHelpShowing }: ChildComponentProps) {
       <div className="absolute w-full h-screen inset-0 bg-black/30 z-3"></div>
 
       <div className="bg-[#C47C31] w-80 md:w-150 h-140 md:h-120 flex flex-col items-center justify-start rounded-2xl z-5">
-        <div className="relative text-white w-full h-19 flex items-center justify-center border-b-2 border-b-[#B0670B] p-2 text-2xl">
+        <div className="relative text-white w-full h-19 flex items-center justify-center border-b-2 border-b-[#B0670B] p-2 text-2xl font-bold">
           HELP
           <button
             className="absolute right-4"

@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import { useHangman } from "../contexts/HangManContext";
+import { useEffect } from "react";
 
 function VirtualKeyBoard() {
-  const { guessedLetters, currentWord, hint, showHint, dispatch } =
+  const { guessedLetters, currentWord, hint, showHint, gameStatus, dispatch } =
     useHangman();
 
   const keyboardRows = [
@@ -10,6 +11,23 @@ function VirtualKeyBoard() {
     ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
     ["Z", "X", "C", "V", "B", "N", "M"],
   ];
+
+  // listening for physical keyboard
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (gameStatus !== "playing") return;
+
+      const key = event.key.toLowerCase();
+
+      if (key >= "a" && key <= "z") {
+        event.preventDefault();
+        dispatch({ type: "GUESS_LETTER", payload: key });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [gameStatus, dispatch]);
 
   const getKeyState = (letter: string) => {
     const lowerLetter = letter.toLowerCase();
@@ -49,12 +67,20 @@ function VirtualKeyBoard() {
       ))}
 
       <button
-        className={`bg-[url('/src/assets/images/icons/hint-frame.svg')]  bg-center bg-no-repeat w-48 flex flex-wrap text-wrap items-center justify-center text-white  mt-3 cursor-pointer ${
-          showHint ? "text-xs p-5 text-center" : "text-2xl h-15"
-        } overflow-scroll`}
+        className={`bg-[url('/src/assets/images/icons/hint-frame.svg')] bg-center bg-no-repeat 
+          w-48 flex items-center justify-center text-white mt-3 cursor-pointer
+          ${
+            showHint
+              ? "text-xs p-5 text-center min-h-[4rem] max-h-32 overflow-y-auto leading-relaxed"
+              : "text-2xl h-15"
+          }`}
         onClick={() => dispatch({ type: "GET_HINT" })}
       >
-        {showHint ? hint : "HINT"}
+        {showHint ? (
+          <div className="break-words max-w-full">{hint}</div>
+        ) : (
+          "HINT"
+        )}
       </button>
     </div>
   );
