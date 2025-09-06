@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useHangman } from "../../contexts/HangManContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SettingsModal from "../modals/SettingsModal";
 import HelpModal from "../modals/HelpModal";
 
@@ -14,6 +14,19 @@ function HomeScreen() {
     dispatch({ type: "RESET_TO_HOME" });
     dispatch({ type: "BUTTON_NAV", payload: "loading" });
   }
+
+  useEffect(
+    function () {
+      if (isHelpSHowing || settings) {
+        document.body.style.overflow = "hidden";
+      }
+
+      return () => {
+        document.body.style.overflow = "auto";
+      };
+    },
+    [isHelpSHowing, settings]
+  );
 
   return (
     <motion.div

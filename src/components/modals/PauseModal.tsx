@@ -116,7 +116,10 @@ function PauseModal({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               className="cursor-pointer -mt-10"
-              onClick={() => onSettings(true)}
+              onClick={() => {
+                onPause(false);
+                onSettings(true);
+              }}
             >
               <img
                 src="/src/assets/images/icons/settings.svg"

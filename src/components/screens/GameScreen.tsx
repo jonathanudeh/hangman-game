@@ -22,7 +22,7 @@ function GameScreen() {
 
   useEffect(
     function () {
-      if (isHelpSHowing || pause) {
+      if (isHelpSHowing || pause || exit || settings) {
         document.body.style.overflow = "hidden";
       }
 
@@ -30,7 +30,7 @@ function GameScreen() {
         document.body.style.overflow = "auto";
       };
     },
-    [isHelpSHowing, pause]
+    [isHelpSHowing, pause, exit, settings]
   );
 
   return (
@@ -129,7 +129,9 @@ function GameScreen() {
           onSettings={setIsSetthings}
         />
       )}
-      {settings && <SettingsModal onSettings={setIsSetthings} />}
+      {settings && (
+        <SettingsModal onSettings={setIsSetthings} onPause={setPause} />
+      )}
       {exit && <ConfirmModal onExit={setExit} onPause={setPause} />}
     </div>
   );

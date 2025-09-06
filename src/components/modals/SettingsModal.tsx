@@ -3,9 +3,10 @@ import type { Dispatch, SetStateAction } from "react";
 
 interface ChildComponentProps {
   onSettings: Dispatch<SetStateAction<boolean>>;
+  onPause?: Dispatch<SetStateAction<boolean>>;
 }
 
-function SettingsModal({ onSettings }: ChildComponentProps) {
+function SettingsModal({ onSettings, onPause }: ChildComponentProps) {
   const { sound, music, dispatch } = useHangman();
 
   return (
@@ -19,7 +20,10 @@ function SettingsModal({ onSettings }: ChildComponentProps) {
           SETTINGS
           <button
             className="absolute right-4 cursor-pointer"
-            onClick={() => onSettings(false)}
+            onClick={() => {
+              onSettings(false);
+              onPause(true);
+            }}
           >
             <img
               src="/src/assets/images/icons/cancel-btn.svg"

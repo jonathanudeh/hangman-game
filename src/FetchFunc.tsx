@@ -39,19 +39,33 @@ const fetchWordsFromWordnik = async (
     throw new Error(`Invalid difficulty: ${difficulty}`);
   }
 
+  // Helper function to check if word is valid (only a-z letters)
+  const isValidWord = (word: string): boolean => {
+    return /^[a-zA-Z]+$/.test(word);
+  };
+
+  // Reduce batch size to be gentler on API
+  const fetchLimit = Math.min(limit * 2, 15);
   const queryParams = new URLSearchParams({
     ...difficultyParams,
-    limit: limit.toString(),
+    limit: fetchLimit.toString(),
     api_key: API_KEY,
   } as any);
 
   try {
-    console.log(`Fetching ${limit} words from Wordnik API...`);
+    console.log(`Fetching ${fetchLimit} words from Wordnik API...`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     const res = await fetch(
-      `https://api.wordnik.com/v4/words.json/randomWords?${queryParams}`
+      `https://api.wordnik.com/v4/words.json/randomWords?${queryParams}`,
+      {
+        signal: controller.signal,
+      }
     );
 
+    clearTimeout(timeoutId);
     if (!res.ok) {
       throw new Error(`Wordnik API returned ${res.status}: ${res.statusText}`);
     }
@@ -62,54 +76,95 @@ const fetchWordsFromWordnik = async (
       throw new Error("No words returned from API");
     }
 
-    // Fetch definitions for all words
-    const wordsWithHints = await Promise.allSettled(
-      data.map(async (wordData: any) => {
-        if (!wordData || !wordData.word) {
-          return null;
+    const wordsWithHints = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const wordData = data[i];
+
+      if (!wordData || !wordData.word) {
+        continue;
+      }
+
+      // Filter out words with non-alphabetic characters
+      if (!isValidWord(wordData.word)) {
+        console.log(`Skipping word with invalid characters: ${wordData.word}`);
+        continue;
+      }
+
+      //might remove
+      // Stop if we have enough valid words
+      if (wordsWithHints.length >= limit) {
+        break;
+      }
+
+      // Fetch definitions for all words
+
+      let hint = "No definition available";
+
+      try {
+        // Add delay between definition requests to avoid rate limiting
+        if (i > 0) {
+          await new Promise((resolve) => setTimeout(resolve, 200)); // 200ms delay
         }
 
-        let hint = "No definition available";
+        const defController = new AbortController();
+        const defTimeoutId = setTimeout(() => defController.abort(), 5000);
 
-        try {
-          const defRes = await fetch(
-            `https://api.wordnik.com/v4/word.json/${wordData.word}/definitions?limit=1&api_key=${API_KEY}`
-          );
+        const defRes = await fetch(
+          `https://api.wordnik.com/v4/word.json/${wordData.word}/definitions?limit=1&api_key=${API_KEY}`,
+          {
+            signal: defController.signal,
+          }
+        );
 
-          if (defRes.ok) {
-            const definition = await defRes.json();
-            if (
-              definition &&
-              Array.isArray(definition) &&
-              definition.length > 0
-            ) {
-              hint = definition[0].text || "No definition available";
-              // cleaning up the hint (remove HTML tags, etc.)
-              hint = hint.replace(/<[^>]*>/g, "").substring(0, 100);
+        clearTimeout(defTimeoutId);
+
+        if (defRes.ok) {
+          const definition = await defRes.json();
+          if (
+            definition &&
+            Array.isArray(definition) &&
+            definition.length > 0
+          ) {
+            const rawHint = definition[0].text;
+            if (typeof rawHint === "string") {
+              // Fix the TypeError
+              hint = rawHint.replace(/<[^>]*>/g, "").substring(0, 200);
+            } else {
+              hint = "Definition format not supported";
             }
           }
-        } catch (defErr) {
-          console.warn("Failed to fetch definition:", defErr);
-          // Continue with default hint
+        } else if (defRes.status === 429) {
+          console.warn(`Rate limited for ${wordData.word}, using generic hint`);
+          hint = `A ${difficulty} level word`;
         }
-        return { word: wordData.word, hint };
-      })
-    );
+      } catch (defErr) {
+        console.warn(
+          `Failed to fetch definition for ${wordData.word}:`,
+          defErr
+        );
+        hint = `A ${difficulty} level word`; // Generic fallback
+      }
+      wordsWithHints.push({ word: wordData.word, hint });
+    }
 
     // Filter out failed requests and null values
-    const validWords = wordsWithHints
-      .filter(
-        (
-          result
-        ): result is PromiseFulfilledResult<{ word: string; hint: string }> =>
-          result.status === "fulfilled" && result.value !== null
-      )
-      .map((result) => result.value);
+    // const validWords = wordsWithHints
+    //   .filter(
+    //     (
+    //       result
+    //     ): result is PromiseFulfilledResult<{ word: string; hint: string }> =>
+    //       result.status === "fulfilled" && result.value !== null
+    //   )
+    //   .map((result) => result.value);
 
-    console.log(
-      `Successfully fetched ${validWords.length} words with definitions`
-    );
-    return validWords;
+    // console.log(
+    //   `Successfully fetched ${validWords.length} words with definitions`
+    // );
+    // return validWords;
+
+    console.log(`Successfully processed ${wordsWithHints.length} words`);
+    return wordsWithHints;
   } catch (error) {
     console.error("Batch wordnik fetch failed:", error);
     throw error;
@@ -133,6 +188,9 @@ const getStaticWord = (difficulty: string, usedWords: string[]) => {
       { word: "earth", hint: "The planet we live on" },
       { word: "happy", hint: "Feeling joy and contentment" },
       { word: "music", hint: "Sounds arranged in harmony" },
+      { word: "chair", hint: "Furniture you sit on" },
+      { word: "phone", hint: "Device for calling people" },
+      { word: "door", hint: "You open this to enter" },
     ],
     normal: [
       { word: "elephant", hint: "Largest land mammal with a trunk" },
@@ -147,6 +205,9 @@ const getStaticWord = (difficulty: string, usedWords: string[]) => {
       { word: "bicycle", hint: "Two-wheeled vehicle you pedal" },
       { word: "sandwich", hint: "Food between two slices of bread" },
       { word: "butterfly", hint: "Colorful insect with large wings" },
+      { word: "calendar", hint: "Shows days, weeks, and months" },
+      { word: "package", hint: "Something wrapped for delivery" },
+      { word: "blanket", hint: "Keeps you warm in bed" },
     ],
     hard: [
       { word: "javascript", hint: "Popular web programming language" },
@@ -173,6 +234,9 @@ const getStaticWord = (difficulty: string, usedWords: string[]) => {
         hint: "Ability to form mental images or concepts",
       },
       { word: "extraordinary", hint: "Very unusual or remarkable" },
+      { word: "sophisticated", hint: "Having great knowledge or experience" },
+      { word: "encyclopedia", hint: "Comprehensive reference book" },
+      { word: "constellation", hint: "Group of stars forming a pattern" },
     ],
   };
 

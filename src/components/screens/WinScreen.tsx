@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useHangman } from "../../contexts/HangManContext";
 import HelpModal from "../modals/HelpModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NextLevelModal from "../modals/NextLevelModal";
 
 function WinScreen() {
@@ -29,6 +29,19 @@ function WinScreen() {
       },
     }),
   };
+
+  useEffect(
+    function () {
+      if (isHelpSHowing || nextLevelModal) {
+        document.body.style.overflow = "hidden";
+      }
+
+      return () => {
+        document.body.style.overflow = "auto";
+      };
+    },
+    [isHelpSHowing, nextLevelModal]
+  );
 
   return (
     <div className="w-full h-screen flex flex-col items-center gap-10">
@@ -97,8 +110,8 @@ function WinScreen() {
           />
         </motion.div>
 
-        <motion.span
-          className="w-auto text-black font-bold text-3xl text-center tracking-[2.2rem]"
+        <motion.div
+          className="w-full flex justify-center items-center"
           initial={{ opacity: 0, y: 30, scale: 0.8 }}
           animate={{
             opacity: 1,
@@ -113,7 +126,11 @@ function WinScreen() {
           }}
         >
           <motion.span
-            className="text-center"
+            className="text-black font-bold text-3xl text-center block"
+            style={{
+              letterSpacing: currentWord.length > 8 ? "0.1em" : "0.25em",
+              wordSpacing: "1.2em",
+            }}
             animate={{
               textShadow: [
                 "0 0 10px #FFD700",
@@ -131,7 +148,7 @@ function WinScreen() {
           >
             {currentWord.toUpperCase()}
           </motion.span>
-        </motion.span>
+        </motion.div>
 
         <motion.div
           className="w-81 h-82 md:w-150 bg-[#E68929] rounded-2xl border-2 border-[#FFB01C] flex flex-col items-center justify-between"

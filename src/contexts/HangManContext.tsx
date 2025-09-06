@@ -17,7 +17,6 @@ interface GameState {
   score: number;
   hint: string;
   showHint: boolean;
-  lives: number;
   difficulty: "easy" | "normal" | "hard";
   sound: boolean;
   music: boolean;
@@ -48,6 +47,7 @@ type GameAction =
   | { type: "SET_MUSIC" }
   | { type: "FETCH_NEW_WORD" }
   | { type: "SET_WORD_POOL"; payload: Array<{ word: string; hint: string }> }
+  | { type: "UPDATE_USED_STATIC_WORDS"; payload: string[] }
   | { type: "RESET_TO_HOME" };
 
 const initialState: GameState = {
@@ -60,7 +60,6 @@ const initialState: GameState = {
   score: 0,
   hint: "",
   showHint: false,
-  lives: 6,
   difficulty: "easy",
   sound: true,
   music: true,
@@ -99,6 +98,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         wordPool: action.payload,
       };
 
+    case "UPDATE_USED_STATIC_WORDS":
+      return {
+        ...state,
+        usedStaticWords: action.payload,
+      };
+
     case "NEW_GAME":
       console.log("New game started with word:", action.payload.word);
 
@@ -111,12 +116,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         gameStatus: "playing",
         showHint: false,
         maxWrongGuesses:
-          state.difficulty === "easy"
-            ? 6
-            : state.difficulty === "normal"
-            ? 5
-            : 4,
-        lives:
           state.difficulty === "easy"
             ? 6
             : state.difficulty === "normal"
@@ -151,7 +150,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const newWrongGuesses = isCorrectGuess
         ? state.wrongGuesses
         : state.wrongGuesses + 1;
-      const newLives = isCorrectGuess ? state.lives : state.lives - 1;
 
       const isWordComplete = state.currentWord
         .toLowerCase()
@@ -173,7 +171,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             : state.difficulty === "normal"
             ? 20
             : 30;
-        const bonusPoints = newLives * 5;
+        const mistakesPenalty = newWrongGuesses * 2;
+        const bonusPoints = Math.max(0, 30 - mistakesPenalty);
         newScore = state.score + basePoints + bonusPoints;
         newLevel = state.level + 1;
       } else if (isGameLost) {
@@ -184,7 +183,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         guessedLetters: newGussedLetters,
         wrongGuesses: newWrongGuesses,
-        lives: newLives,
         gameStatus: newGameStatus,
         score: newScore,
         level: newLevel,
@@ -205,12 +203,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             : state.difficulty === "normal"
             ? 5
             : 4,
-        lives:
-          state.difficulty === "easy"
-            ? 6
-            : state.difficulty === "normal"
-            ? 5
-            : 4,
       };
 
     case "SET_DIFFICULTY":
@@ -219,27 +211,32 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         difficulty: action.payload,
         maxWrongGuesses:
           action.payload === "easy" ? 6 : action.payload === "normal" ? 5 : 4,
-        lives:
-          action.payload === "easy" ? 6 : action.payload === "normal" ? 5 : 4,
         // wordPool and used words resets when difficulty changes
         wordPool: [],
         usedStaticWords: [],
       };
 
     case "GET_HINT": {
-      // if(state.hint === "No definition available") return
-      if (state.hint === "" || state.hint === undefined || state.showHint)
-        return state;
+      if (state.showHint) return state;
 
-      // Hint costs 1 life
+      // If hint is "No definition available", show it without deducting life
+      if (
+        state.hint === "No definition available" ||
+        state.hint === "" ||
+        state.hint === undefined
+      ) {
+        return {
+          ...state,
+          showHint: true,
+        };
+      }
+
+      // Only deduct life if there's an actual hint
       const newWrongGuesses = state.wrongGuesses + 1;
-      const newLives = state.lives - 1;
-      // console.log(newWrongGuesses);
 
       return {
         ...state,
         wrongGuesses: newWrongGuesses,
-        lives: newLives,
         showHint: true,
       };
     }
@@ -275,6 +272,29 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  // Pre-fetch words on initial load
+  useEffect(() => {
+    const preFetchWords = async () => {
+      try {
+        console.log("Pre-fetching words on app load...");
+        const words = await fetchWordsFromWordnik(state.difficulty, 8);
+        if (words && words.length > 0) {
+          dispatch({ type: "SET_WORD_POOL", payload: words });
+          console.log(`Pre-fetched ${words.length} words`);
+        }
+      } catch (err) {
+        console.log(
+          "Pre-fetch failed, will use static words when needed " + err
+        );
+      }
+    };
+
+    // Only pre-fetch once on mount
+    if (state.wordPool.length === 0 && state.gameStatus === "home") {
+      preFetchWords();
+    }
+  }, []);
+
   useEffect(() => {
     const getNextWord = () => {
       if (state.wordPool.length > 0) {
@@ -302,10 +322,9 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
           state.usedStaticWords
         );
 
-        // Update used words list
         dispatch({
-          type: "SET_WORD_POOL",
-          payload: [], // Keep pool empty but we'll update usedStaticWords via state
+          type: "UPDATE_USED_STATIC_WORDS",
+          payload: updatedUsedWords,
         });
 
         dispatch({
@@ -329,11 +348,9 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // fetching words in batch function  for game
     const fetchWordBatch = async () => {
-      // dispatch({ type: "SET_LOADING" });
-
       try {
-        const words = await fetchWordsFromWordnik(state.difficulty, 1);
-        console.log("Batch API words received:", words);
+        const words = await fetchWordsFromWordnik(state.difficulty, 20);
+        console.log("Batch API words received: ", words);
 
         if (words && words.length > 0) {
           dispatch({ type: "SET_WORD_POOL", payload: words });
@@ -365,7 +382,7 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
       state.gameStatus === "loading" && state.currentWord === "";
 
     if (shouldFetchWord) {
-      if (state.wordPool.length <= 2) {
+      if (state.wordPool.length <= 5) {
         fetchWordBatch();
       } else {
         getNextWord();
