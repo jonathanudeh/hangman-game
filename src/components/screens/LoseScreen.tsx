@@ -45,7 +45,11 @@ function LoseScreen() {
         </motion.div>
 
         <motion.span
-          className="w-auto text-black font-bold text-3xl text-center tracking-[2.2rem]"
+          className="text-black font-bold text-3xl text-center block"
+          style={{
+            letterSpacing: currentWord.length > 8 ? "0.1em" : "0.25em",
+            wordSpacing: "1.2em",
+          }}
           initial={{ opacity: 0, y: 20 }}
           animate={{
             opacity: 1,
@@ -98,7 +102,7 @@ function LoseScreen() {
                 transition: { duration: 0.2 },
               }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => dispatch({ type: "RESET_GAME" })}
+              onClick={() => dispatch({ type: "NEXT_GAME" })}
             >
               <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
                 <span className="text-white font-bold">Restart</span>

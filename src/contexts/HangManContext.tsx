@@ -48,7 +48,8 @@ type GameAction =
   | { type: "FETCH_NEW_WORD" }
   | { type: "SET_WORD_POOL"; payload: Array<{ word: string; hint: string }> }
   | { type: "UPDATE_USED_STATIC_WORDS"; payload: string[] }
-  | { type: "RESET_TO_HOME" };
+  | { type: "RESET_TO_HOME" }
+  | { type: "LOAD_FROM_STORAGE" };
 
 const initialState: GameState = {
   gameStatus: "home",
@@ -67,8 +68,83 @@ const initialState: GameState = {
   usedStaticWords: [],
 };
 
+const loadFromStorage = () => {
+  try {
+    const level = localStorage.getItem("hangman_level");
+    const difficulty = localStorage.getItem("hangmn_difficulty");
+    const sound = localStorage.getItem("hangman_sound");
+    const music = localStorage.getItem("hangman_music");
+
+    return {
+      level: level ? parseInt(level) : 1,
+      difficulty: (difficulty as "easy" | "normal" | "hard") || "easy",
+      sound: sound !== null ? JSON.parse(sound) : true,
+      music: music !== null ? JSON.parse(music) : true,
+    };
+  } catch (err) {
+    console.error("Error loading from localStorage: ", err);
+    return {
+      level: 1,
+      difficulty: "easy" as const,
+      sound: true,
+      music: true,
+    };
+  }
+};
+
+// reusable Save to localStorage
+const saveToStorage = (key: string, value: any) => {
+  try {
+    localStorage.setItem(
+      key,
+      typeof value === "string" ? value : JSON.stringify(value)
+    );
+  } catch (error) {
+    console.error("Error saving to localStorage:", error);
+  }
+};
+
 const reducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
+    case "LOAD_FROM_STORAGE": {
+      const savedData = loadFromStorage();
+
+      // Load cached word pool and used static words for the current difficulty
+      let cachedWordPool: Array<{ word: string; hint: string }> = [];
+      let cachedUsedWords: string[] = [];
+
+      try {
+        const wordPoolData = localStorage.getItem(
+          `hangman_wordPool_${savedData.difficulty}`
+        );
+        const usedWordsData = localStorage.getItem(
+          `hangman_usedStatic_${savedData.difficulty}`
+        );
+
+        if (wordPoolData) {
+          const parsed = JSON.parse(wordPoolData);
+          if (Array.isArray(parsed)) {
+            cachedWordPool = parsed;
+          }
+        }
+
+        if (usedWordsData) {
+          const parsed = JSON.parse(usedWordsData);
+          if (Array.isArray(parsed)) {
+            cachedUsedWords = parsed;
+          }
+        }
+      } catch (err) {
+        console.error("Error loading cached data: ", err);
+      }
+      return {
+        ...state,
+        ...savedData,
+        wordPool: cachedWordPool,
+        usedStaticWords: cachedUsedWords,
+      };
+    }
+
     case "BUTTON_NAV":
       if (action.payload === "home") {
         return {
@@ -84,7 +160,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case "RESET_TO_HOME":
       return {
-        ...initialState,
+        ...state,
         wordPool: state.wordPool,
         usedStaticWords: state.usedStaticWords,
         difficulty: state.difficulty,
@@ -93,12 +169,18 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       };
 
     case "SET_WORD_POOL":
+      // Cache word pool to localStorage
+      saveToStorage(`hangman_wordPool_${state.difficulty}`, action.payload);
+
       return {
         ...state,
         wordPool: action.payload,
       };
 
     case "UPDATE_USED_STATIC_WORDS":
+      // Cache used static words to localStorage
+      saveToStorage(`hangman_usedStatic_${state.difficulty}`, action.payload);
+
       return {
         ...state,
         usedStaticWords: action.payload,
@@ -115,24 +197,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         wrongGuesses: 0,
         gameStatus: "playing",
         showHint: false,
+        level: state.level,
         maxWrongGuesses:
           state.difficulty === "easy"
             ? 6
             : state.difficulty === "normal"
             ? 5
             : 4,
-      };
-
-    case "RESET_GAME":
-      return {
-        ...state,
-        gameStatus: "playing",
-        showHint: false,
-        guessedLetters: [],
-        difficulty: state.difficulty,
-        level: state.level,
-        wrongGuesses: 0,
-        score: 0,
       };
 
     case "GUESS_LETTER": {
@@ -175,6 +246,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         const bonusPoints = Math.max(0, 30 - mistakesPenalty);
         newScore = state.score + basePoints + bonusPoints;
         newLevel = state.level + 1;
+
+        // Save new level to localStorage
+        saveToStorage("hangman_level", newLevel);
       } else if (isGameLost) {
         newGameStatus = "lost";
       }
@@ -188,6 +262,18 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         level: newLevel,
       };
     }
+
+    case "RESET_GAME":
+      return {
+        ...state,
+        gameStatus: "playing",
+        showHint: false,
+        guessedLetters: [],
+        difficulty: state.difficulty,
+        level: state.level,
+        wrongGuesses: 0,
+        score: 0,
+      };
 
     case "NEXT_GAME":
       return {
@@ -205,16 +291,48 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             : 4,
       };
 
-    case "SET_DIFFICULTY":
+    case "SET_DIFFICULTY": {
+      // Save new difficulty to localStorage
+      saveToStorage("hangman_difficulty", action.payload);
+
+      // Load word pool and used static words for the new difficulty
+      let newWordPool: Array<{ word: string; hint: string }> = [];
+      let newUsedStaticWords: string[] = [];
+
+      try {
+        const wordPoolData = localStorage.getItem(
+          `hangman_wordPool_${action.payload}`
+        );
+        const usedWordsData = localStorage.getItem(
+          `hangman_usedStatic_${action.payload}`
+        );
+
+        if (wordPoolData) {
+          const parsed = JSON.parse(wordPoolData);
+          if (Array.isArray(parsed)) {
+            newWordPool = parsed;
+          }
+        }
+
+        if (usedWordsData) {
+          const parsed = JSON.parse(usedWordsData);
+          if (Array.isArray(parsed)) {
+            newUsedStaticWords = parsed;
+          }
+        }
+      } catch (error) {
+        console.error("Error loading data for new difficulty:", error);
+      }
+
       return {
         ...state,
         difficulty: action.payload,
         maxWrongGuesses:
           action.payload === "easy" ? 6 : action.payload === "normal" ? 5 : 4,
-        // wordPool and used words resets when difficulty changes
-        wordPool: [],
-        usedStaticWords: [],
+        wordPool: newWordPool,
+        usedStaticWords: newUsedStaticWords,
       };
+    }
 
     case "GET_HINT": {
       if (state.showHint) return state;
@@ -223,7 +341,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (
         state.hint === "No definition available" ||
         state.hint === "" ||
-        state.hint === undefined
+        state.hint === undefined ||
+        state.hint.includes("level word")
       ) {
         return {
           ...state,
@@ -254,12 +373,17 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         gameStatus: "loading",
       };
 
-    case "SET_SOUND":
-      return { ...state, sound: !state.sound };
+    case "SET_SOUND": {
+      const newSound = !state.sound;
+      saveToStorage("hangman_sound", newSound);
+      return { ...state, sound: newSound };
+    }
 
-    case "SET_MUSIC":
-      return { ...state, music: !state.music };
-
+    case "SET_MUSIC": {
+      const newMusic = !state.music;
+      saveToStorage("hangman_music", newMusic);
+      return { ...state, music: newMusic };
+    }
     default:
       return state;
   }
@@ -272,9 +396,22 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  // Load from localStorage on mount
+  useEffect(() => {
+    dispatch({ type: "LOAD_FROM_STORAGE" });
+  }, []);
+
   // Pre-fetch words on initial load
   useEffect(() => {
     const preFetchWords = async () => {
+      // Only fetch if we don't have cached words
+      if (state.wordPool.length > 0) {
+        console.log(
+          `Using ${state.wordPool.length} cached words for ${state.difficulty}`
+        );
+        return;
+      }
+
       try {
         console.log("Pre-fetching words on app load...");
         const words = await fetchWordsFromWordnik(state.difficulty, 8);
@@ -290,7 +427,7 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     // Only pre-fetch once on mount
-    if (state.wordPool.length === 0 && state.gameStatus === "home") {
+    if (state.gameStatus === "home") {
       preFetchWords();
     }
   }, []);
@@ -308,7 +445,7 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
           type: "NEW_GAME",
           payload: {
             word: wordData.word,
-            hint: wordData.hint || "No hint available",
+            hint: wordData.hint || "No definition available",
           },
         });
         return;
@@ -353,7 +490,7 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log("Batch API words received: ", words);
 
         if (words && words.length > 0) {
-          dispatch({ type: "SET_WORD_POOL", payload: words });
+          // dispatch({ type: "SET_WORD_POOL", payload: words });
 
           const firstWord = words[0];
           const remainingWords = words.slice(1);

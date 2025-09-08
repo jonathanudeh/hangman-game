@@ -7,7 +7,11 @@ import NextLevelModal from "../modals/NextLevelModal";
 function WinScreen() {
   const [isHelpSHowing, setIsHelpShowing] = useState(false);
   const [nextLevelModal, setNextLevelModal] = useState(false);
-  const { currentWord, level, score } = useHangman();
+  const { currentWord, level, maxWrongGuesses, wrongGuesses } = useHangman();
+
+  const currentPercentage = Math.round(
+    ((maxWrongGuesses - wrongGuesses) / maxWrongGuesses) * 100
+  );
 
   // Confetti-like particles animation
   const confettiVariants = {
@@ -191,7 +195,7 @@ function WinScreen() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.5 }}
             >
-              Progress: <span>{score}</span>
+              Progress: <span>{currentPercentage}%</span>
             </motion.div>
 
             <motion.button
