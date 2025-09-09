@@ -94,7 +94,7 @@ function VirtualKeyBoard() {
       >
         {showHint ? (
           <motion.div
-            className="absolute top-15 sm:top-10 left-0 bg-amber-800 border-4 border-amber-600 rounded-xl p-6 w-1/2 max-w-full sm:max-w-1/3 mx-2 shadow-2xl"
+            className="absolute top-15 sm:top-10 left-0 bg-amber-800/50 border-4 border-amber-600/50 rounded-xl p-6 w-1/2 max-w-full sm:max-w-1/3 mx-2 shadow-2xl"
             initial={{ scale: 0.8, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.8, y: 20 }}
