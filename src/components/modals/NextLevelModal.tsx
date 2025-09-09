@@ -27,7 +27,7 @@ function NextLevelModal({ onNextLevel }: ChildComponentProps) {
             onClick={() => onNextLevel(false)}
           >
             <img
-              src="/src/assets/images/icons/cancel-btn.svg"
+              src="/assets/images/icons/cancel-btn.svg"
               alt="A cancel button"
               className="w-10 h-10"
             />
@@ -40,16 +40,16 @@ function NextLevelModal({ onNextLevel }: ChildComponentProps) {
           </span>
 
           <div className="flex w-full items-center  justify-center gap-2">
-            <div className="bg-[url('/src/assets/images/icons/prev-and-next-level-pad.svg')] w-21 h-21 text-white font-bold flex items-center justify-center text-4xl">
+            <div className="bg-[url('/assets/images/icons/prev-and-next-level-pad.svg')] w-21 h-21 text-white font-bold flex items-center justify-center text-4xl">
               {" "}
               {level < 10 ? `0${level - 1}` : level - 1}
             </div>
             <img
-              src="/src/assets/images/icons/arrow.svg"
+              src="/assets/images/icons/arrow.svg"
               alt="A circlular pad"
               className="w-15 h-15"
             />
-            <div className="bg-[url('/src/assets/images/icons/prev-and-next-level-pad.svg')] w-21 h-21 text-white font-bold flex items-center justify-center text-4xl">
+            <div className="bg-[url('/assets/images/icons/prev-and-next-level-pad.svg')] w-21 h-21 text-white font-bold flex items-center justify-center text-4xl">
               {" "}
               {level < 10 ? `0${level}` : level}
             </div>
@@ -60,7 +60,7 @@ function NextLevelModal({ onNextLevel }: ChildComponentProps) {
             onClick={() => goToNextLevel()}
           >
             <img
-              src="/src/assets/images/icons/difficulty-board.svg"
+              src="/assets/images/icons/difficulty-board.svg"
               alt="a booard"
               className="w-44 h-13"
             />

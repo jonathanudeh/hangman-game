@@ -83,7 +83,7 @@ function VirtualKeyBoard() {
       ))}
 
       <button
-        className={`bg-[url('/src/assets/images/icons/hint-frame.svg')] bg-center bg-no-repeat 
+        className={`bg-[url('/assets/images/icons/hint-frame.svg')] bg-center bg-no-repeat 
           w-48 flex items-center justify-center text-white mt-3 cursor-pointer
           ${
             showHint

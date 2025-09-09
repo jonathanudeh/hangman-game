@@ -41,12 +41,12 @@ function LoseScreen() {
           }}
         >
           <motion.img
-            src="/src/assets/images/hangman-parts/hang-rope.svg"
+            src="/assets/images/hangman-parts/hang-rope.svg"
             alt="A hanging rope"
             className="w-15 md:w-13"
           />
           <motion.img
-            src="/src/assets/images/hangman-parts/lose-man.svg"
+            src="/assets/images/hangman-parts/lose-man.svg"
             alt="A supposed dead doll man"
             className="w-35 md:w-32 -mt-18"
             // initial={{ rotate: -15 }}
@@ -121,7 +121,7 @@ function LoseScreen() {
               whileTap={{ scale: 0.95 }}
               onClick={() => dispatch({ type: "NEXT_GAME" })}
             >
-              <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
+              <div className="bg-[url('/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
                 <span className="text-white font-bold">Restart</span>
               </div>
             </motion.button>
@@ -140,7 +140,7 @@ function LoseScreen() {
                 dispatch({ type: "BUTTON_NAV", payload: "difficulty" })
               }
             >
-              <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
+              <div className="bg-[url('/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
                 <span className="text-white font-bold">Difficulty</span>
               </div>
             </motion.button> */}
@@ -157,7 +157,7 @@ function LoseScreen() {
                 className="cursor-pointer -mt-10"
               >
                 <img
-                  src="/src/assets/images/icons/help-icon.svg"
+                  src="/assets/images/icons/help-icon.svg"
                   alt="Help icon"
                   className="w-15 h-15"
                 />

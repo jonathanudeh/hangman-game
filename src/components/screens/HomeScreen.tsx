@@ -47,7 +47,7 @@ function HomeScreen() {
         transition={{ delay: 0.2 }}
         className="flex  justify-between pl-4"
       >
-        <div className="bg-[url('/src/assets/images/icons/level-board.svg')] bg-contain bg-center bg-no-repeat w-24 h-12 flex items-center justify-center">
+        <div className="bg-[url('/assets/images/icons/level-board.svg')] bg-contain bg-center bg-no-repeat w-24 h-12 flex items-center justify-center">
           <span className="text-white font-bold">Level {level}</span>
         </div>
         <div className="flex flex-col pr-4">
@@ -58,7 +58,7 @@ function HomeScreen() {
             onClick={() => setIsSetthings(true)}
           >
             <img
-              src="/src/assets/images/icons/settings.svg"
+              src="/assets/images/icons/settings.svg"
               alt="Settings"
               className="w-15 h-15"
             />
@@ -72,8 +72,8 @@ function HomeScreen() {
             <img
               src={`${
                 sound
-                  ? "/src/assets/images/icons/sound-icon.svg"
-                  : "/src/assets/images/icons/mute-icon.svg"
+                  ? "/assets/images/icons/sound-icon.svg"
+                  : "/assets/images/icons/mute-icon.svg"
               }`}
               alt="Settings"
               className="w-15 h-15"
@@ -89,7 +89,7 @@ function HomeScreen() {
         className="flex flex-col items-center justify-center"
       >
         <motion.img
-          src="/src/assets/images/hangman-parts/hangman-hs-text.svg"
+          src="/assets/images/hangman-parts/hangman-hs-text.svg"
           alt="Hang man text"
           initial={{ y: -60 }}
           animate={{ y: 0 }}
@@ -106,7 +106,7 @@ function HomeScreen() {
           onClick={handlePlayClick}
         >
           <img
-            src="/src/assets/images/icons/play.svg"
+            src="/assets/images/icons/play.svg"
             alt="Play button"
             className="w-40 h-40 md:w-60 md:h-60"
           />
@@ -126,7 +126,7 @@ function HomeScreen() {
           onClick={() => setIsHelpShowing(true)}
         >
           <img
-            src="/src/assets/images/icons/help.svg"
+            src="/assets/images/icons/help.svg"
             alt="Help icon"
             className="w-15 h-15"
           />
@@ -135,7 +135,7 @@ function HomeScreen() {
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-24 h-10 flex items-center justify-center cursor-pointer"
+          className="bg-[url('/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-24 h-10 flex items-center justify-center cursor-pointer"
           onClick={() =>
             dispatch({ type: "BUTTON_NAV", payload: "difficulty" })
           }

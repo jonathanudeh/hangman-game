@@ -53,12 +53,12 @@ function GameScreen() {
           }}
         >
           <motion.img
-            src="/src/assets/images/hangman-parts/hang-rope.svg"
+            src="/assets/images/hangman-parts/hang-rope.svg"
             alt="A hanging rope"
             className="w-10 md:w-10"
           />
           <motion.img
-            src="/src/assets/images/hangman-parts/win-man.svg"
+            src="/assets/images/hangman-parts/win-man.svg"
             alt="A supposed dead doll man"
             className="w-30 md:w-30 -mt-12"
             // initial={{ rotate: -15 }}
@@ -79,14 +79,14 @@ function GameScreen() {
             onClick={() => setIsHelpShowing(true)}
           >
             <img
-              src="/src/assets/images/icons/help-icon.svg"
+              src="/assets/images/icons/help-icon.svg"
               alt="Help button"
               className="w-15 h-15"
             />
           </button>
           <button className="cursor-pointer" onClick={() => setPause(true)}>
             <img
-              src="/src/assets/images/icons/pause-btn.svg"
+              src="/assets/images/icons/pause-btn.svg"
               alt="Pause button"
               className="w-15 h-15"
             />

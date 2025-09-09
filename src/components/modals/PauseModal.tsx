@@ -31,7 +31,7 @@ function PauseModal({
             onClick={() => onPause(() => false)}
           >
             <img
-              src="/src/assets/images/icons/cancel-btn.svg"
+              src="/assets/images/icons/cancel-btn.svg"
               alt="A cancel button"
               className="w-10 h-10"
             />
@@ -53,7 +53,7 @@ function PauseModal({
               whileTap={{ scale: 0.95 }}
               onClick={() => onPause(() => false)}
             >
-              <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
+              <div className="bg-[url('/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
                 <span className="text-white font-bold">Resume</span>
               </div>
             </motion.button>
@@ -73,7 +73,7 @@ function PauseModal({
                 dispatch({ type: "RESET_GAME" });
               }}
             >
-              <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
+              <div className="bg-[url('/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
                 <span className="text-white font-bold">Restart</span>
               </div>
             </motion.button>
@@ -92,7 +92,7 @@ function PauseModal({
               onClick={() => onIsHelpShowing(true)}
             >
               <img
-                src="/src/assets/images/icons/help-icon.svg"
+                src="/assets/images/icons/help-icon.svg"
                 alt="Help icon"
                 className="w-15 h-15"
               />
@@ -103,7 +103,7 @@ function PauseModal({
               className="cursor-pointer absolute top-10 left-1/2 -translate-x-1/2 z-20"
             >
               <img
-                src="/src/assets/images/icons/home-icon.svg"
+                src="/assets/images/icons/home-icon.svg"
                 alt="Home icon"
                 className="w-15 h-15 "
                 onClick={() => {
@@ -122,7 +122,7 @@ function PauseModal({
               }}
             >
               <img
-                src="/src/assets/images/icons/settings.svg"
+                src="/assets/images/icons/settings.svg"
                 alt="settings icon"
                 className="w-15 h-15"
               />

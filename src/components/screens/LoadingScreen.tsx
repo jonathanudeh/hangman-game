@@ -18,7 +18,7 @@ function LoadingScreen() {
         className="transform-origin-top"
       >
         <img
-          src="/src/assets/images/hangman-parts/hook-logo.svg"
+          src="/assets/images/hangman-parts/hook-logo.svg"
           alt="Pirate Hook"
           className="w-50 h-50 "
         />
@@ -38,7 +38,7 @@ function LoadingScreen() {
         }}
       >
         <img
-          src="/src/assets/images/hangman-parts/hangman-text.svg"
+          src="/assets/images/hangman-parts/hangman-text.svg"
           alt="Hangman Game"
           className="w-48 md:w-64"
         />

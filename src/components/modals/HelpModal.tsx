@@ -17,7 +17,7 @@ function HelpModal({ onIsHelpShowing }: ChildComponentProps) {
             onClick={() => onIsHelpShowing(() => false)}
           >
             <img
-              src="/src/assets/images/icons/cancel-btn.svg"
+              src="/assets/images/icons/cancel-btn.svg"
               alt="A cancel button"
               className="w-10 h-10"
             />

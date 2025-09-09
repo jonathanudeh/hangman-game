@@ -104,7 +104,7 @@ function WinScreen() {
         onClick={() => setIsHelpShowing(true)}
       >
         <img
-          src="/src/assets/images/icons/help-icon.svg"
+          src="/assets/images/icons/help-icon.svg"
           alt=""
           className="w-15 h-15"
         />
@@ -128,7 +128,7 @@ function WinScreen() {
           }}
         >
           <motion.img
-            src="/src/assets/images/hangman-parts/win-man.svg"
+            src="/assets/images/hangman-parts/win-man.svg"
             alt="A happy doll man"
             animate={{
               y: [0, -10, 0],
@@ -245,7 +245,7 @@ function WinScreen() {
               onClick={() => setNextLevelModal(true)}
             >
               <img
-                src="/src/assets/images/hangman-parts/win-next-btn.svg"
+                src="/assets/images/hangman-parts/win-next-btn.svg"
                 alt="Next button"
                 className="w-64 md:w-66 h-16 md:h-20"
               />

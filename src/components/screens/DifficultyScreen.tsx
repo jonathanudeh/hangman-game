@@ -16,7 +16,7 @@ function DifficultyScreen() {
         className="flex justify-between"
       >
         <button
-          className="bg-[url('/src/assets/images/icons/go-back.svg')] bg-contain bg-center bg-no-repeat w-15 h-15 flex items-center justify-center ml-2 cursor-pointer"
+          className="bg-[url('/assets/images/icons/go-back.svg')] bg-contain bg-center bg-no-repeat w-15 h-15 flex items-center justify-center ml-2 cursor-pointer"
           onClick={() =>
             dispatch({
               type: "BUTTON_NAV",
@@ -33,7 +33,7 @@ function DifficultyScreen() {
             onClick={() => setIsSetthings(true)}
           >
             <img
-              src="/src/assets/images/icons/settings.svg"
+              src="/assets/images/icons/settings.svg"
               alt="Settings"
               className="w-15 h-15"
             />
@@ -44,7 +44,7 @@ function DifficultyScreen() {
             className="cursor-pointer"
           >
             <img
-              src="/src/assets/images/icons/sound-icon.svg"
+              src="/assets/images/icons/sound-icon.svg"
               alt="Settings"
               className="w-15 h-15"
             />
@@ -56,7 +56,7 @@ function DifficultyScreen() {
         className={`h-2/5 md:h-1/2 flex flex-col items-center justify-between mt-15`}
       >
         <button
-          className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-64 h-20 flex items-center justify-center cursor-pointer"
+          className="bg-[url('/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-64 h-20 flex items-center justify-center cursor-pointer"
           onClick={() => dispatch({ type: "SET_DIFFICULTY", payload: "easy" })}
         >
           <span
@@ -69,7 +69,7 @@ function DifficultyScreen() {
         </button>
 
         <button
-          className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-64 h-20 flex items-center justify-center cursor-pointer"
+          className="bg-[url('/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-64 h-20 flex items-center justify-center cursor-pointer"
           onClick={() =>
             dispatch({ type: "SET_DIFFICULTY", payload: "normal" })
           }
@@ -84,7 +84,7 @@ function DifficultyScreen() {
         </button>
 
         <button
-          className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-64 h-20 flex items-center justify-center cursor-pointer"
+          className="bg-[url('/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-64 h-20 flex items-center justify-center cursor-pointer"
           onClick={() => dispatch({ type: "SET_DIFFICULTY", payload: "hard" })}
         >
           <span

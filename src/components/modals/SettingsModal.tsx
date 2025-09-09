@@ -26,7 +26,7 @@ function SettingsModal({ onSettings, onPause }: ChildComponentProps) {
             }}
           >
             <img
-              src="/src/assets/images/icons/cancel-btn.svg"
+              src="/assets/images/icons/cancel-btn.svg"
               alt="A cancel button"
               className="w-7 h-7"
             />
@@ -38,7 +38,7 @@ function SettingsModal({ onSettings, onPause }: ChildComponentProps) {
           <div className="w-full flex justify-between">
             <div className="flex gap-2 text-white font-bold">
               <img
-                src="/src/assets/images/icons/settings-sound-icon.svg"
+                src="/assets/images/icons/settings-sound-icon.svg"
                 alt="Sound icon"
               />
               <span>Sound</span>
@@ -63,10 +63,7 @@ function SettingsModal({ onSettings, onPause }: ChildComponentProps) {
           {/* music control */}
           <div className="w-full flex justify-between">
             <div className="flex gap-2 text-white font-bold ">
-              <img
-                src="/src/assets/images/icons/music-icon.svg"
-                alt="Sound icon"
-              />
+              <img src="/assets/images/icons/music-icon.svg" alt="Sound icon" />
               <span>Music</span>
             </div>
             <button
