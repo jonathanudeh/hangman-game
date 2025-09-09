@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
 import { useHangman } from "../contexts/HangManContext";
 import { useEffect } from "react";
+import { useSound } from "../cutom-hooks/useSound";
 
 function VirtualKeyBoard() {
   const { guessedLetters, currentWord, hint, showHint, gameStatus, dispatch } =
     useHangman();
+  const { playKeyPress, playHint } = useSound();
 
   const keyboardRows = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -21,13 +23,17 @@ function VirtualKeyBoard() {
 
       if (key >= "a" && key <= "z") {
         event.preventDefault();
-        dispatch({ type: "GUESS_LETTER", payload: key });
+
+        if (!guessedLetters.includes(key)) {
+          playKeyPress();
+          dispatch({ type: "GUESS_LETTER", payload: key });
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [gameStatus, dispatch]);
+  }, [gameStatus, guessedLetters, playKeyPress, dispatch]);
 
   const getKeyState = (letter: string) => {
     const lowerLetter = letter.toLowerCase();
@@ -38,7 +44,17 @@ function VirtualKeyBoard() {
   };
 
   const guessLetter = (letter: string) => {
-    dispatch({ type: "GUESS_LETTER", payload: letter });
+    const lowerLetter = letter.toLowerCase();
+
+    if (!guessedLetters.includes(lowerLetter)) {
+      playKeyPress();
+      dispatch({ type: "GUESS_LETTER", payload: letter });
+    }
+  };
+
+  const handleHintClick = () => {
+    playHint();
+    dispatch({ type: "GET_HINT" });
   };
 
   return (
@@ -74,10 +90,42 @@ function VirtualKeyBoard() {
               ? "text-xs p-5 text-center min-h-[4rem] max-h-32 overflow-y-auto leading-relaxed"
               : "text-2xl h-15"
           }`}
-        onClick={() => dispatch({ type: "GET_HINT" })}
+        onClick={handleHintClick}
       >
         {showHint ? (
-          <div className="break-words max-w-full">{hint}</div>
+          <motion.div
+            className="absolute top-15 sm:top-10 left-0 bg-amber-800 border-4 border-amber-600 rounded-xl p-6 w-1/2 max-w-full sm:max-w-1/3 mx-2 shadow-2xl"
+            initial={{ scale: 0.8, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.8, y: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            {/* Close button
+            <button
+              className="absolute top-2 right-2 w-8 h-8 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white font-bold transition-colors"
+              aria-label="Close hint"
+            >
+              x
+            </button> */}
+            {/* Hint icon */}
+            <div className="flex flex-col">
+              <div className="w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-amber-800 font-bold text-xs">💡</span>
+              </div>
+
+              {/* Hint text */}
+              <div className="text-white">
+                <h3 className="font-bold text-lg mb-2 text-yellow-300">Hint</h3>
+                <p className="text-xs sm:text-lg leading-relaxed break-words">
+                  {hint}
+                </p>
+              </div>
+            </div>
+            {/* Bottom tip
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+              <div className="w-4 h-4 bg-amber-800 border-b-4 border-r-4 border-amber-600 transform rotate-45" />
+            </div> */}
+          </motion.div>
         ) : (
           "HINT"
         )}

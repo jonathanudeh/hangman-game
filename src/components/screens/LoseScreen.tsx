@@ -1,8 +1,25 @@
 import { motion } from "framer-motion";
 import { useHangman } from "../../contexts/HangManContext";
+import { useEffect } from "react";
 
 function LoseScreen() {
-  const { currentWord, dispatch } = useHangman();
+  const { currentWord, gameStatus, dispatch } = useHangman();
+
+  useEffect(() => {
+    const handleEnterPress = (e: KeyboardEvent) => {
+      if (gameStatus !== "lost") return;
+      const key = e.key.toLocaleLowerCase();
+
+      if (key === "enter") {
+        e.preventDefault();
+
+        dispatch({ type: "NEXT_GAME" });
+      }
+    };
+
+    window.addEventListener("keydown", handleEnterPress);
+    return () => window.removeEventListener("keydown", handleEnterPress);
+  }, [dispatch, gameStatus]);
 
   return (
     <motion.div

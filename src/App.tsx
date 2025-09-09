@@ -5,9 +5,12 @@ import HomeScreen from "./components/screens/HomeScreen";
 import LoadingScreen from "./components/screens/LoadingScreen";
 import WinScreen from "./components/screens/WinScreen";
 import { useHangman } from "./contexts/HangManContext";
+import { useSound } from "./cutom-hooks/useSound";
 
 function App() {
   const { gameStatus } = useHangman();
+  useSound();
+
   return (
     <div className="w-full min-h-screen bg-fixed bg-cover bg-center bg-no-repeat bg-[url('/src/assets/images/hangman-parts/homescreen-background-desktop.svg')] px-">
       {gameStatus === "loading" && <LoadingScreen />}

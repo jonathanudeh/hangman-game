@@ -7,7 +7,14 @@ import NextLevelModal from "../modals/NextLevelModal";
 function WinScreen() {
   const [isHelpSHowing, setIsHelpShowing] = useState(false);
   const [nextLevelModal, setNextLevelModal] = useState(false);
-  const { currentWord, level, maxWrongGuesses, wrongGuesses } = useHangman();
+  const {
+    currentWord,
+    level,
+    maxWrongGuesses,
+    wrongGuesses,
+    gameStatus,
+    dispatch,
+  } = useHangman();
 
   const currentPercentage = Math.round(
     ((maxWrongGuesses - wrongGuesses) / maxWrongGuesses) * 100
@@ -46,6 +53,27 @@ function WinScreen() {
     },
     [isHelpSHowing, nextLevelModal]
   );
+
+  useEffect(() => {
+    const handleEnterPress = (e: KeyboardEvent) => {
+      if (gameStatus !== "won") return;
+      const key = e.key.toLocaleLowerCase();
+
+      if (key === "enter") {
+        e.preventDefault();
+
+        setNextLevelModal(true);
+
+        if (gameStatus === "won" && nextLevelModal) {
+          setNextLevelModal(false);
+          dispatch({ type: "NEXT_GAME" });
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleEnterPress);
+    return () => window.removeEventListener("keydown", handleEnterPress);
+  }, [dispatch, gameStatus, nextLevelModal]);
 
   return (
     <div className="w-full h-screen flex flex-col items-center gap-10">

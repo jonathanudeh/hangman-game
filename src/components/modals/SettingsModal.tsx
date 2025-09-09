@@ -22,7 +22,7 @@ function SettingsModal({ onSettings, onPause }: ChildComponentProps) {
             className="absolute right-4 cursor-pointer"
             onClick={() => {
               onSettings(false);
-              onPause(true);
+              onPause?.(true);
             }}
           >
             <img
