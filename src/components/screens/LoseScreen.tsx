@@ -168,7 +168,7 @@ function LoseScreen() {
                 className="cursor-pointer absolute top-15 left-1/2 -translate-x-1/2 z-20"
               >
                 <img
-                  src="/src/assets/images/icons/home-icon.svg"
+                  src="/assets/images/icons/home-icon.svg"
                   alt="Home icon"
                   className="w-15 h-15 "
                   onClick={() =>
@@ -182,7 +182,7 @@ function LoseScreen() {
                 className="cursor-pointer -mt-10"
               >
                 <img
-                  src="/src/assets/images/icons/settings.svg"
+                  src="/assets/images/icons/settings.svg"
                   alt="settings icon"
                   className="w-15 h-15"
                 />

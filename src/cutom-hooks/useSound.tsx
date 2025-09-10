@@ -14,30 +14,28 @@ export const useSound = () => {
   // initialize audio files once
   useEffect(() => {
     if (!backgroundMusicRef.current) {
-      backgroundMusicRef.current = new Audio(
-        "/src/assets/sounds/background.mp3"
-      );
+      backgroundMusicRef.current = new Audio("/assets/sounds/background.mp3");
       backgroundMusicRef.current.loop = true;
       backgroundMusicRef.current.volume = 0.2;
     }
 
     if (!keyPressRef.current) {
-      keyPressRef.current = new Audio("/src/assets/sounds/keypress.ogg");
+      keyPressRef.current = new Audio("/assets/sounds/keypress.ogg");
       keyPressRef.current.volume = 0.5;
     }
 
     if (!hintRef.current) {
-      hintRef.current = new Audio("/src/assets/sounds/hint.wav");
+      hintRef.current = new Audio("/assets/sounds/hint.wav");
       hintRef.current.volume = 0.5;
     }
 
     if (!winRef.current) {
-      winRef.current = new Audio("/src/assets/sounds/win.wav");
+      winRef.current = new Audio("/assets/sounds/win.wav");
       winRef.current.volume = 0.6;
     }
 
     if (!loseRef.current) {
-      loseRef.current = new Audio("/src/assets/sounds/lose.wav");
+      loseRef.current = new Audio("/assets/sounds/lose.wav");
       loseRef.current.volume = 0.6;
     }
   }, []);
@@ -53,7 +51,7 @@ export const useSound = () => {
     }
   }, [music]);
 
-  // Handle win/lose sounds
+  //  win or lose sounds
   useEffect(() => {
     if (gameStatus === "won" && sound && winRef.current) {
       winRef.current.play().catch(() => {});

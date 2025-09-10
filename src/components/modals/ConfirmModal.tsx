@@ -27,7 +27,7 @@ function ConfirmModal({ onExit, onPause }: ChildComponentProps) {
             }}
           >
             <img
-              src="/src/assets/images/icons/cancel-btn.svg"
+              src="/assets/images/icons/cancel-btn.svg"
               alt="A cancel button"
               className="w-10 h-10"
             />
@@ -48,7 +48,7 @@ function ConfirmModal({ onExit, onPause }: ChildComponentProps) {
               whileTap={{ scale: 0.95 }}
               onClick={() => dispatch({ type: "BUTTON_NAV", payload: "home" })}
             >
-              <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
+              <div className="bg-[url('/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
                 <span className="text-white font-bold">YES</span>
               </div>
             </motion.button>
@@ -68,7 +68,7 @@ function ConfirmModal({ onExit, onPause }: ChildComponentProps) {
                 onPause(true);
               }}
             >
-              <div className="bg-[url('/src/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
+              <div className="bg-[url('/assets/images/icons/difficulty-board.svg')] bg-contain bg-center bg-no-repeat w-45 h-13 flex items-center justify-center">
                 <span className="text-white font-bold">NO</span>
               </div>
             </motion.button>
