@@ -34,7 +34,7 @@ function GameScreen() {
   );
 
   return (
-    <div className="relative flex flex-col gap-20 md:gap-0 md:justify-between w-full h-screen">
+    <div className="relative flex flex-col gap-20 md:gap-0 md:justify-between w-full min-h-screen">
       <div className="flex justify-between px-4">
         <p className="text-black font-bold text-2xl mt-1">
           {" "}

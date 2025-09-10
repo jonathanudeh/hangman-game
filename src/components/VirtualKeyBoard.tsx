@@ -62,7 +62,7 @@ function VirtualKeyBoard() {
       {keyboardRows.map((row, rowIndex) => (
         <motion.div
           key={rowIndex}
-          className={`flex gap-[3px] md:gap-2 pl-[${
+          className={`flex gap-[1px] md:gap-2 pl-[${
             rowIndex === 1 ? "1rem" : rowIndex === 2 ? "2rem" : "0"
           }]`}
           initial={{ y: 20, opacity: 0 }}
@@ -101,12 +101,7 @@ function VirtualKeyBoard() {
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             {/* Close button
-            <button
-              className="absolute top-2 right-2 w-8 h-8 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white font-bold transition-colors"
-              aria-label="Close hint"
-            >
-              x
-            </button> */}
+           
             {/* Hint icon */}
             <div className="flex flex-col">
               <div className="w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
@@ -121,10 +116,6 @@ function VirtualKeyBoard() {
                 </p>
               </div>
             </div>
-            {/* Bottom tip
-            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-              <div className="w-4 h-4 bg-amber-800 border-b-4 border-r-4 border-amber-600 transform rotate-45" />
-            </div> */}
           </motion.div>
         ) : (
           "HINT"
