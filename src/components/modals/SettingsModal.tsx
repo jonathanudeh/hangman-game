@@ -4,9 +4,14 @@ import type { Dispatch, SetStateAction } from "react";
 interface ChildComponentProps {
   onSettings: Dispatch<SetStateAction<boolean>>;
   onPause?: Dispatch<SetStateAction<boolean>>;
+  onIsLoseModal?: Dispatch<SetStateAction<boolean>>;
 }
 
-function SettingsModal({ onSettings, onPause }: ChildComponentProps) {
+function SettingsModal({
+  onSettings,
+  onPause,
+  onIsLoseModal,
+}: ChildComponentProps) {
   const { sound, music, dispatch } = useHangman();
 
   return (
@@ -23,6 +28,7 @@ function SettingsModal({ onSettings, onPause }: ChildComponentProps) {
             onClick={() => {
               onSettings(false);
               onPause?.(true);
+              onIsLoseModal?.(true);
             }}
           >
             <img

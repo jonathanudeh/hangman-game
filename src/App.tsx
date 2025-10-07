@@ -12,7 +12,7 @@ function App() {
   useSound();
 
   return (
-    <div className="w-full min-h-screen bg-fixed bg-cover bg-center bg-no-repeat bg-[url('/assets/images/hangman-parts/homescreen-background-desktop.svg')] px-">
+    <div className="w-full min-h-screen bg-fixed bg-cover bg-center bg-no-repeat bg-[url('/assets/images/hangman-parts/homescreen-background-desktop.svg')]">
       {gameStatus === "loading" && <LoadingScreen />}
 
       {gameStatus === "home" && <HomeScreen />}

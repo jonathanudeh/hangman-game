@@ -11,11 +11,13 @@ interface GameState {
   gameStatus: "home" | "playing" | "won" | "lost" | "loading" | "difficulty";
   currentWord: string;
   guessedLetters: string[];
+  autoRevealedLetters: string[];
   wrongGuesses: number;
   maxWrongGuesses: number;
   level: number;
   score: number;
   hint: string;
+  category?: string;
   showHint: boolean;
   difficulty: "easy" | "normal" | "hard";
   sound: boolean;
@@ -38,6 +40,7 @@ type GameAction =
   | { type: "SET_DIFFICULTY"; payload: "easy" | "normal" | "hard" }
   | { type: "SET_LOADING" }
   | { type: "GET_HINT" }
+  | { type: "WRONG_GUESS" }
   | { type: "RESET_GAME" }
   | { type: "NEXT_GAME" }
   | { type: "SET_LOADING" }
@@ -55,11 +58,13 @@ const initialState: GameState = {
   gameStatus: "home",
   currentWord: "",
   guessedLetters: [],
+  autoRevealedLetters: [],
   wrongGuesses: 0,
   maxWrongGuesses: 6,
   level: 1,
   score: 0,
   hint: "",
+  category: "",
   showHint: false,
   difficulty: "easy",
   sound: true,
@@ -103,6 +108,65 @@ const saveToStorage = (key: string, value: any) => {
     console.error("Error saving to localStorage:", error);
   }
 };
+
+// helper func to reveal a few random letters when a game starts
+const revealRandomLetters = (word: string, revealCount: number): string[] => {
+  const letters = word.split("");
+  const revealedIndexes = new Set<number>();
+  while (revealedIndexes.size < Math.min(revealCount, word.length)) {
+    revealedIndexes.add(Math.floor(Math.random() * word.length));
+  }
+  return letters
+    .filter((_, i) => revealedIndexes.has(i))
+    .map((l) => l.toLowerCase());
+};
+
+const detectCategory = (definitionText: string): string => {
+  const text = definitionText?.toLowerCase() || "";
+  if (
+    text.includes("animal") ||
+    text.includes("mammal") ||
+    text.includes("bird") ||
+    text.includes("fish")
+  )
+    return "Animal";
+  if (
+    text.includes("fruit") ||
+    text.includes("vegetable") ||
+    text.includes("food")
+  )
+    return "Food";
+  if (
+    text.includes("country") ||
+    text.includes("city") ||
+    text.includes("place")
+  )
+    return "Place";
+  if (
+    text.includes("object") ||
+    text.includes("device") ||
+    text.includes("tool")
+  )
+    return "Object";
+  if (text.includes("person") || text.includes("individual")) return "Person";
+  if (text.includes("sport") || text.includes("game")) return "Sport/Game";
+  return "General Word";
+};
+
+function revealExtraLetter(word: string, revealedLetters: string[]): string[] {
+  const letters = word.toLowerCase().split("");
+
+  // find letters that are not revealed yet
+  const unrevealedLetters = letters.filter((l) => !revealedLetters.includes(l));
+
+  if (unrevealedLetters.length === 0) return revealedLetters;
+
+  // pick a random one to reveal
+  const randomLetter =
+    unrevealedLetters[Math.floor(Math.random() * unrevealedLetters.length)];
+
+  return [...revealedLetters, randomLetter];
+}
 
 const reducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
@@ -186,14 +250,25 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         usedStaticWords: action.payload,
       };
 
-    case "NEW_GAME":
+    case "NEW_GAME": {
       console.log("New game started with word:", action.payload.word);
+      const { word, hint } = action.payload;
+
+      const category = detectCategory(word);
+
+      // number of letters per difficulty
+      const revealCount =
+        state.difficulty === "easy" ? 1 : state.difficulty === "normal" ? 1 : 1;
+
+      const autoRevealed = revealRandomLetters(word, revealCount);
 
       return {
         ...state,
-        currentWord: action.payload.word,
-        hint: action.payload.hint,
+        currentWord: word,
+        hint: hint,
+        category,
         guessedLetters: [],
+        autoRevealedLetters: autoRevealed,
         wrongGuesses: 0,
         gameStatus: "playing",
         showHint: false,
@@ -205,6 +280,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             ? 5
             : 4,
       };
+    }
 
     case "GUESS_LETTER": {
       const letter = action.payload.toLowerCase();
@@ -253,6 +329,23 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         newGameStatus = "lost";
       }
 
+      // Reveal extra letter when lives are getting low
+      let updatedAutoRevealed = [...state.autoRevealedLetters];
+
+      const maxAutoReveals =
+        state.difficulty === "easy"
+          ? [2, 4]
+          : state.difficulty === "normal"
+          ? [2, 5]
+          : [3, 5];
+
+      if (!isCorrectGuess && maxAutoReveals.includes(newWrongGuesses)) {
+        updatedAutoRevealed = revealExtraLetter(
+          state.currentWord,
+          updatedAutoRevealed
+        );
+      }
+
       return {
         ...state,
         guessedLetters: newGussedLetters,
@@ -260,6 +353,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         gameStatus: newGameStatus,
         score: newScore,
         level: newLevel,
+        autoRevealedLetters: updatedAutoRevealed,
       };
     }
 
@@ -417,7 +511,7 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
         const words = await fetchWordsFromWordnik(state.difficulty, 8);
         if (words && words.length > 0) {
           dispatch({ type: "SET_WORD_POOL", payload: words });
-          console.log(`Pre-fetched ${words.length} words`);
+          console.log(`Pre-fetched ${words.length} words`, words);
         }
       } catch (err) {
         console.log(
@@ -430,7 +524,7 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
     if (state.gameStatus === "home") {
       preFetchWords();
     }
-  }, []);
+  }, [state.difficulty, state.gameStatus, state.wordPool.length]);
 
   useEffect(() => {
     const getNextWord = () => {
@@ -486,7 +580,7 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
     // fetching words in batch function  for game
     const fetchWordBatch = async () => {
       try {
-        const words = await fetchWordsFromWordnik(state.difficulty, 20);
+        const words = await fetchWordsFromWordnik(state.difficulty, 8);
         console.log("Batch API words received: ", words);
 
         if (words && words.length > 0) {

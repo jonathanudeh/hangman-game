@@ -2,9 +2,10 @@ import { type Dispatch, type SetStateAction } from "react";
 
 interface ChildComponentProps {
   onIsHelpShowing: Dispatch<SetStateAction<boolean>>;
+  onIsLoseModal?: Dispatch<SetStateAction<boolean>>;
 }
 
-function HelpModal({ onIsHelpShowing }: ChildComponentProps) {
+function HelpModal({ onIsHelpShowing, onIsLoseModal }: ChildComponentProps) {
   return (
     <div className="fixed w-full h-screen flex items-center justify-center z-2">
       <div className="absolute w-full h-screen inset-0 bg-black/30 z-3"></div>
@@ -14,7 +15,10 @@ function HelpModal({ onIsHelpShowing }: ChildComponentProps) {
           HELP
           <button
             className="absolute right-4"
-            onClick={() => onIsHelpShowing(() => false)}
+            onClick={() => {
+              onIsHelpShowing(() => false);
+              onIsLoseModal?.(true);
+            }}
           >
             <img
               src="/assets/images/icons/cancel-btn.svg"

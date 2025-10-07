@@ -5,7 +5,7 @@ import SettingsModal from "../modals/SettingsModal";
 
 function DifficultyScreen() {
   const [settings, setIsSetthings] = useState(false);
-  const { difficulty, dispatch } = useHangman();
+  const { sound, difficulty, dispatch } = useHangman();
 
   return (
     <div className="w-full h-screen flex flex-col">
@@ -42,9 +42,14 @@ function DifficultyScreen() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="cursor-pointer"
+            onClick={() => dispatch({ type: "SET_SOUND" })}
           >
             <img
-              src="/assets/images/icons/sound-icon.svg"
+              src={`${
+                sound
+                  ? "/assets/images/icons/sound-icon.svg"
+                  : "/assets/images/icons/mute-icon.svg"
+              }`}
               alt="Settings"
               className="w-15 h-15"
             />

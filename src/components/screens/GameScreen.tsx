@@ -13,11 +13,20 @@ function GameScreen() {
   const [exit, setExit] = useState(false);
   const [settings, setIsSetthings] = useState(false);
 
-  const { currentWord, wrongGuesses, maxWrongGuesses, guessedLetters } =
-    useHangman();
+  const {
+    currentWord,
+    wrongGuesses,
+    maxWrongGuesses,
+    guessedLetters,
+    autoRevealedLetters,
+  } = useHangman();
 
   const shouldRevealLetter = (letter: string) => {
     return guessedLetters.includes(letter.toLowerCase());
+  };
+
+  const autoRevealWord = (letter: string) => {
+    return autoRevealedLetters.includes(letter.toLowerCase());
   };
 
   useEffect(
@@ -104,7 +113,13 @@ function GameScreen() {
             transition={{ delay: index * 0.1 }}
           >
             <motion.span
-              className="text-3xl font-bold text-amber-900"
+              className={`
+                ${
+                  shouldRevealLetter(letter)
+                    ? "text-amber-900 font-bold text-3xl"
+                    : "text-amber-400 opacity-60 text-3xl"
+                }
+              `}
               initial={{ opacity: 0, y: 20 }}
               animate={{
                 opacity: 1,
@@ -112,7 +127,9 @@ function GameScreen() {
               }}
               transition={{ duration: 0.3 }}
             >
-              {shouldRevealLetter(letter) ? letter.toUpperCase() : ""}
+              {shouldRevealLetter(letter) || autoRevealWord(letter)
+                ? letter.toUpperCase()
+                : ""}
             </motion.span>
           </motion.div>
         ))}

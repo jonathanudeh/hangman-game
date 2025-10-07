@@ -13,7 +13,7 @@ export const useSound = () => {
 
   // initialize audio files once
   useEffect(() => {
-    if (!backgroundMusicRef.current) {
+    if (!backgroundMusicRef.current && music) {
       backgroundMusicRef.current = new Audio("/assets/sounds/background.mp3");
       backgroundMusicRef.current.loop = true;
       backgroundMusicRef.current.volume = 0.2;
@@ -38,16 +38,18 @@ export const useSound = () => {
       loseRef.current = new Audio("/assets/sounds/lose.wav");
       loseRef.current.volume = 0.6;
     }
-  }, []);
+  }, [music]);
 
   // Handle background music
   useEffect(() => {
     if (!backgroundMusicRef.current) return;
 
     if (music) {
+      backgroundMusicRef.current.currentTime = 0;
       backgroundMusicRef.current.play().catch(() => {});
     } else {
       backgroundMusicRef.current.pause();
+      backgroundMusicRef.current.currentTime = 0;
     }
   }, [music]);
 

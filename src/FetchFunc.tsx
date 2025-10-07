@@ -1,8 +1,5 @@
 // fetch function
-const fetchWordsFromWordnik = async (
-  difficulty: string,
-  limit: number = 10
-) => {
+const fetchWordsFromWordnik = async (difficulty: string, limit: number = 8) => {
   const API_KEY = import.meta.env.VITE_WORDNIK_API_KEY;
 
   if (!API_KEY) {
@@ -45,7 +42,7 @@ const fetchWordsFromWordnik = async (
   };
 
   // Reduce batch size to be gentler on API
-  const fetchLimit = Math.min(limit * 2, 15);
+  const fetchLimit = Math.min(limit * 2, 8);
   const queryParams = new URLSearchParams({
     ...difficultyParams,
     limit: fetchLimit.toString(),
@@ -99,12 +96,12 @@ const fetchWordsFromWordnik = async (
 
       // Fetch definitions for all words
 
-      let hint = "No definition available";
+      let hint = "";
 
       try {
         // Add delay between definition requests to avoid rate limiting
         if (i > 0) {
-          await new Promise((resolve) => setTimeout(resolve, 200)); // 200ms delay
+          await new Promise((resolve) => setTimeout(resolve, 300));
         }
 
         const defController = new AbortController();
@@ -119,49 +116,37 @@ const fetchWordsFromWordnik = async (
 
         clearTimeout(defTimeoutId);
 
-        if (defRes.ok) {
-          const definition = await defRes.json();
-          if (
-            definition &&
-            Array.isArray(definition) &&
-            definition.length > 0
-          ) {
-            const rawHint = definition[0].text;
-            if (typeof rawHint === "string") {
-              // Fix the TypeError
-              hint = rawHint.replace(/<[^>]*>/g, "").substring(0, 200);
-            } else {
-              hint = "Definition format not supported";
-            }
-          }
-        } else if (defRes.status === 429) {
-          console.warn(`Rate limited for ${wordData.word}, using generic hint`);
-          hint = `A ${difficulty} level word`;
-        }
+        if (!defRes.ok) continue; // skip invalid
+
+        const defs = await defRes.json();
+        if (!Array.isArray(defs) || defs.length === 0) continue; // skip if none
+
+        // Filter valid definitions only
+        const validDefs = defs
+          .filter(
+            (def) =>
+              def.text &&
+              typeof def.text === "string" &&
+              !def.text
+                .toLowerCase()
+                .includes("definition format not supported") &&
+              !def.text.toLowerCase().includes("wordnik") &&
+              !def.text.toLowerCase().includes("see also") &&
+              def.text.trim().length > 10
+          )
+          .map((def) => def.text.replace(/<[^>]*>/g, "").trim());
+
+        if (validDefs.length === 0) continue; // skip if no clean defs
+
+        hint = validDefs[0].substring(0, 200);
       } catch (defErr) {
         console.warn(
           `Failed to fetch definition for ${wordData.word}:`,
           defErr
         );
-        hint = `A ${difficulty} level word`; // Generic fallback
       }
       wordsWithHints.push({ word: wordData.word, hint });
     }
-
-    // Filter out failed requests and null values
-    // const validWords = wordsWithHints
-    //   .filter(
-    //     (
-    //       result
-    //     ): result is PromiseFulfilledResult<{ word: string; hint: string }> =>
-    //       result.status === "fulfilled" && result.value !== null
-    //   )
-    //   .map((result) => result.value);
-
-    // console.log(
-    //   `Successfully fetched ${validWords.length} words with definitions`
-    // );
-    // return validWords;
 
     console.log(`Successfully processed ${wordsWithHints.length} words`);
     return wordsWithHints;
@@ -176,67 +161,69 @@ const getStaticWord = (difficulty: string, usedWords: string[]) => {
 
   const staticWords = {
     easy: [
-      { word: "cat", hint: "A small furry pet that meows" },
-      { word: "dog", hint: "Man's best friend" },
-      { word: "sun", hint: "The star that lights our day" },
-      { word: "car", hint: "A vehicle with four wheels" },
-      { word: "book", hint: "You read this for knowledge" },
-      { word: "tree", hint: "Tall plant with branches and leaves" },
-      { word: "house", hint: "Where people live" },
-      { word: "water", hint: "Clear liquid you drink" },
-      { word: "fire", hint: "Hot, bright flames" },
-      { word: "earth", hint: "The planet we live on" },
-      { word: "happy", hint: "Feeling joy and contentment" },
-      { word: "music", hint: "Sounds arranged in harmony" },
-      { word: "chair", hint: "Furniture you sit on" },
-      { word: "phone", hint: "Device for calling people" },
-      { word: "door", hint: "You open this to enter" },
+      { word: "planet", hint: "A large body orbiting a star" },
+      { word: "garden", hint: "An area where flowers or vegetables grow" },
+      { word: "mirror", hint: "Reflective surface that shows your image" },
+      { word: "bridge", hint: "Structure built over a river or road" },
+      { word: "rocket", hint: "Vehicle that travels into space" },
+      { word: "pencil", hint: "Used for writing or drawing" },
+      { word: "island", hint: "Land surrounded by water" },
+      { word: "forest", hint: "Large area covered with trees" },
+      { word: "castle", hint: "Fortified building from medieval times" },
+      { word: "desert", hint: "Dry, sandy region with little rain" },
+      { word: "window", hint: "Glass-covered opening in a wall" },
+      { word: "pirate", hint: "Sailor who steals from ships" },
+      { word: "planet", hint: "A large object that orbits a star" },
+      {
+        word: "museum",
+        hint: "Building where historical objects are displayed",
+      },
+      { word: "market", hint: "Place where goods are bought and sold" },
     ],
+
     normal: [
-      { word: "elephant", hint: "Largest land mammal with a trunk" },
-      { word: "computer", hint: "Electronic device for processing data" },
-      { word: "rainbow", hint: "Colorful arc in the sky after rain" },
-      { word: "guitar", hint: "Six-stringed musical instrument" },
-      { word: "mountain", hint: "Very tall natural elevation of land" },
-      { word: "kitchen", hint: "Room where you cook food" },
-      { word: "library", hint: "Place with many books to borrow" },
-      { word: "garden", hint: "Area where plants are grown" },
-      { word: "camera", hint: "Device used to take pictures" },
-      { word: "bicycle", hint: "Two-wheeled vehicle you pedal" },
-      { word: "sandwich", hint: "Food between two slices of bread" },
-      { word: "butterfly", hint: "Colorful insect with large wings" },
-      { word: "calendar", hint: "Shows days, weeks, and months" },
-      { word: "package", hint: "Something wrapped for delivery" },
-      { word: "blanket", hint: "Keeps you warm in bed" },
+      { word: "volcano", hint: "Mountain that erupts lava" },
+      { word: "diamond", hint: "Hard precious stone used in jewelry" },
+      { word: "tornado", hint: "Violent rotating column of air" },
+      { word: "hospital", hint: "Place where sick people are treated" },
+      { word: "airplane", hint: "Flying vehicle with wings" },
+      { word: "triangle", hint: "Shape with three sides" },
+      { word: "merchant", hint: "Person involved in trade" },
+      { word: "festival", hint: "Public celebration or event" },
+      { word: "machine", hint: "Device that performs tasks" },
+      { word: "harvest", hint: "Gathering of ripe crops" },
+      { word: "journey", hint: "Act of traveling from one place to another" },
+      { word: "paradise", hint: "Place of perfect happiness" },
+      { word: "umbrella", hint: "Used to protect against rain" },
+      { word: "adventure", hint: "Exciting experience or activity" },
+      { word: "language", hint: "System of communication using words" },
     ],
+
     hard: [
-      { word: "javascript", hint: "Popular web programming language" },
-      { word: "mysterious", hint: "Difficult to understand or explain" },
-      { word: "adventure", hint: "Exciting or unusual experience" },
-      { word: "symphony", hint: "Large-scale musical composition" },
-      { word: "algorithm", hint: "Step-by-step procedure for calculations" },
+      { word: "philosophy", hint: "Study of fundamental nature of reality" },
+      { word: "metaphor", hint: "Figure of speech comparing unlike things" },
+      { word: "hierarchy", hint: "System where people are ranked by status" },
+      { word: "conscience", hint: "Inner sense of right and wrong" },
+      { word: "psychiatrist", hint: "Doctor specializing in mental health" },
+      { word: "catastrophe", hint: "Sudden disaster or tragedy" },
+      { word: "hemisphere", hint: "Half of the Earth or a sphere" },
+      {
+        word: "ecosystem",
+        hint: "Community of living organisms and environment",
+      },
+      { word: "benevolent", hint: "Well-meaning and kindly" },
+      { word: "architecture", hint: "Art and science of building design" },
       {
         word: "photosynthesis",
         hint: "Process plants use to make food from sunlight",
       },
-      { word: "architecture", hint: "Design and construction of buildings" },
       {
-        word: "philosophy",
-        hint: "Study of fundamental questions about existence",
+        word: "transparency",
+        hint: "Quality of being clear or easy to see through",
       },
-      { word: "psychology", hint: "Scientific study of mind and behavior" },
-      {
-        word: "technology",
-        hint: "Application of scientific knowledge for practical purposes",
-      },
-      {
-        word: "imagination",
-        hint: "Ability to form mental images or concepts",
-      },
-      { word: "extraordinary", hint: "Very unusual or remarkable" },
-      { word: "sophisticated", hint: "Having great knowledge or experience" },
-      { word: "encyclopedia", hint: "Comprehensive reference book" },
-      { word: "constellation", hint: "Group of stars forming a pattern" },
+      { word: "equilibrium", hint: "State of balance between forces" },
+      { word: "perseverance", hint: "Persistence despite difficulties" },
+      { word: "jurisdiction", hint: "Legal authority to make decisions" },
     ],
   };
 
