@@ -101,7 +101,7 @@ const fetchWordsFromWordnik = async (difficulty: string, limit: number = 8) => {
       try {
         // Add delay between definition requests to avoid rate limiting
         if (i > 0) {
-          await new Promise((resolve) => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
         const defController = new AbortController();
@@ -118,13 +118,13 @@ const fetchWordsFromWordnik = async (difficulty: string, limit: number = 8) => {
 
         if (!defRes.ok) continue; // skip invalid
 
+        // skip if none
         const defs = await defRes.json();
-        if (!Array.isArray(defs) || defs.length === 0) continue; // skip if none
 
         // Filter valid definitions only
         const validDefs = defs
           .filter(
-            (def) =>
+            (def: any) =>
               def.text &&
               typeof def.text === "string" &&
               !def.text
@@ -134,9 +134,10 @@ const fetchWordsFromWordnik = async (difficulty: string, limit: number = 8) => {
               !def.text.toLowerCase().includes("see also") &&
               def.text.trim().length > 10
           )
-          .map((def) => def.text.replace(/<[^>]*>/g, "").trim());
+          .map((def: any) => def.text.replace(/<[^>]*>/g, "").trim());
 
-        if (validDefs.length === 0) continue; // skip if no clean defs
+        // skip if no clean defs
+        if (validDefs.length === 0) continue;
 
         hint = validDefs[0].substring(0, 200);
       } catch (defErr) {

@@ -3,6 +3,8 @@ import React, {
   useContext,
   useEffect,
   useReducer,
+  useRef,
+  useState,
   type Dispatch,
 } from "react";
 import { fetchWordsFromWordnik, getStaticWord } from "../FetchFunc";
@@ -49,7 +51,7 @@ type GameAction =
   | { type: "SET_SOUND" }
   | { type: "SET_MUSIC" }
   | { type: "FETCH_NEW_WORD" }
-  | { type: "SET_WORD_POOL"; payload: Array<{ word: string; hint: string }> }
+  | { type: "ADD_TO_WORD_POOL"; payload: Array<{ word: string; hint: string }> }
   | { type: "UPDATE_USED_STATIC_WORDS"; payload: string[] }
   | { type: "RESET_TO_HOME" }
   | { type: "LOAD_FROM_STORAGE" };
@@ -76,7 +78,7 @@ const initialState: GameState = {
 const loadFromStorage = () => {
   try {
     const level = localStorage.getItem("hangman_level");
-    const difficulty = localStorage.getItem("hangmn_difficulty");
+    const difficulty = localStorage.getItem("hangman_difficulty");
     const sound = localStorage.getItem("hangman_sound");
     const music = localStorage.getItem("hangman_music");
 
@@ -119,38 +121,6 @@ const revealRandomLetters = (word: string, revealCount: number): string[] => {
   return letters
     .filter((_, i) => revealedIndexes.has(i))
     .map((l) => l.toLowerCase());
-};
-
-const detectCategory = (definitionText: string): string => {
-  const text = definitionText?.toLowerCase() || "";
-  if (
-    text.includes("animal") ||
-    text.includes("mammal") ||
-    text.includes("bird") ||
-    text.includes("fish")
-  )
-    return "Animal";
-  if (
-    text.includes("fruit") ||
-    text.includes("vegetable") ||
-    text.includes("food")
-  )
-    return "Food";
-  if (
-    text.includes("country") ||
-    text.includes("city") ||
-    text.includes("place")
-  )
-    return "Place";
-  if (
-    text.includes("object") ||
-    text.includes("device") ||
-    text.includes("tool")
-  )
-    return "Object";
-  if (text.includes("person") || text.includes("individual")) return "Person";
-  if (text.includes("sport") || text.includes("game")) return "Sport/Game";
-  return "General Word";
 };
 
 function revealExtraLetter(word: string, revealedLetters: string[]): string[] {
@@ -225,21 +195,18 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case "RESET_TO_HOME":
       return {
         ...state,
-        wordPool: state.wordPool,
-        usedStaticWords: state.usedStaticWords,
-        difficulty: state.difficulty,
-        sound: state.sound,
-        music: state.music,
       };
 
-    case "SET_WORD_POOL":
+    case "ADD_TO_WORD_POOL": {
       // Cache word pool to localStorage
       saveToStorage(`hangman_wordPool_${state.difficulty}`, action.payload);
+      const newPool = [...state.wordPool, ...action.payload];
 
       return {
         ...state,
-        wordPool: action.payload,
+        wordPool: newPool,
       };
+    }
 
     case "UPDATE_USED_STATIC_WORDS":
       // Cache used static words to localStorage
@@ -254,25 +221,27 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       console.log("New game started with word:", action.payload.word);
       const { word, hint } = action.payload;
 
-      const category = detectCategory(word);
-
       // number of letters per difficulty
       const revealCount =
         state.difficulty === "easy" ? 1 : state.difficulty === "normal" ? 1 : 1;
 
       const autoRevealed = revealRandomLetters(word, revealCount);
 
+      // remove the used word from the pool
+      const newWordPool = state.wordPool.slice(1);
+      saveToStorage(`hangman_wordPool_${state.difficulty}`, newWordPool);
+
       return {
         ...state,
         currentWord: word,
         hint: hint,
-        category,
         guessedLetters: [],
         autoRevealedLetters: autoRevealed,
         wrongGuesses: 0,
         gameStatus: "playing",
         showHint: false,
         level: state.level,
+        wordPool: newWordPool,
         maxWrongGuesses:
           state.difficulty === "easy"
             ? 6
@@ -489,51 +458,194 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  // const [hasLoaded, setHasLoaded] = useState(false);
+  const isFetchingRef = useRef(false);
+  const hasPrefetchedRef = useRef(false);
 
   // Load from localStorage on mount
   useEffect(() => {
     dispatch({ type: "LOAD_FROM_STORAGE" });
+    // setHasLoaded(true);
   }, []);
 
   // Pre-fetch words on initial load
   useEffect(() => {
+    if (hasPrefetchedRef.current) return;
+    if (state.wordPool.length > 0) {
+      console.log(`Already have ${state.wordPool.length} words cached`);
+      hasPrefetchedRef.current = true;
+      return;
+    }
+
     const preFetchWords = async () => {
-      // Only fetch if we don't have cached words
-      if (state.wordPool.length > 0) {
-        console.log(
-          `Using ${state.wordPool.length} cached words for ${state.difficulty}`
-        );
-        return;
-      }
+      if (isFetchingRef.current) return;
+
+      isFetchingRef.current = true;
+      hasPrefetchedRef.current = true;
 
       try {
-        console.log("Pre-fetching words on app load...");
+        console.log("Pre-fetching words for", state.difficulty);
         const words = await fetchWordsFromWordnik(state.difficulty, 8);
+
         if (words && words.length > 0) {
-          dispatch({ type: "SET_WORD_POOL", payload: words });
-          console.log(`Pre-fetched ${words.length} words`, words);
+          console.log(`Pre-fetched ${words.length} words`);
+          dispatch({ type: "ADD_TO_WORD_POOL", payload: words });
         }
       } catch (err) {
-        console.log(
-          "Pre-fetch failed, will use static words when needed " + err
-        );
+        console.error("Pre-fetch failed:", err);
+      } finally {
+        isFetchingRef.current = false;
       }
     };
 
-    // Only pre-fetch once on mount
-    if (state.gameStatus === "home") {
-      preFetchWords();
+    preFetchWords();
+  }, [state.wordPool.length, state.difficulty]);
+
+  // Handle word fetching when pool is low or when starting a game
+  useEffect(() => {
+    const shouldFetchMore =
+      state.wordPool.length > 0 && state.wordPool.length <= 3;
+
+    if (shouldFetchMore && !isFetchingRef.current) {
+      const fetchMore = async () => {
+        isFetchingRef.current = true;
+
+        try {
+          console.log("Pool low, fetching more words");
+          const words = await fetchWordsFromWordnik(state.difficulty, 8);
+
+          if (words && words.length > 0) {
+            console.log(
+              `Fetched ${words.length} more words. Adding to existing ${state.wordPool.length}`
+            );
+            dispatch({ type: "ADD_TO_WORD_POOL", payload: words });
+          }
+        } catch (err) {
+          console.error("Background fetch failed:", err);
+        } finally {
+          isFetchingRef.current = false;
+        }
+      };
+
+      fetchMore();
     }
-  }, [state.difficulty, state.gameStatus, state.wordPool.length]);
+  }, [state.wordPool.length, state.difficulty]);
+
+  // useEffect(() => {
+  //   const getNextWord = () => {
+  //     if (state.wordPool.length > 0) {
+  //       const wordData = state.wordPool[0];
+
+  //       //remove the word from pool
+  //       const newPool = state.wordPool.slice(1);
+  //       dispatch({ type: "SET_WORD_POOL", payload: newPool });
+
+  //       dispatch({
+  //         type: "NEW_GAME",
+  //         payload: {
+  //           word: wordData.word,
+  //           hint: wordData.hint || "No definition available",
+  //         },
+  //       });
+  //       return;
+  //     }
+
+  //     // If pool is empty, get static word with rotation
+  //     console.log("Using static word fallback");
+  //     try {
+  //       const { staticWord, updatedUsedWords } = getStaticWord(
+  //         state.difficulty,
+  //         state.usedStaticWords
+  //       );
+
+  //       dispatch({
+  //         type: "UPDATE_USED_STATIC_WORDS",
+  //         payload: updatedUsedWords,
+  //       });
+
+  //       dispatch({
+  //         type: "NEW_GAME",
+  //         payload: {
+  //           word: staticWord.word,
+  //           hint: staticWord.hint,
+  //         },
+  //       });
+  //     } catch (err) {
+  //       console.error("Static word fallback failed:", err);
+  //       dispatch({
+  //         type: "NEW_GAME",
+  //         payload: {
+  //           word: "fallback",
+  //           hint: "Emergency word when all else fails",
+  //         },
+  //       });
+  //     }
+  //   };
+
+  //   // fetching words in batch function  for game
+  //   const fetchWordBatch = async () => {
+  //     try {
+  //       const words = await fetchWordsFromWordnik(state.difficulty, 8);
+  //       console.log("Batch API words received: ", words);
+
+  //       if (words && words.length > 0) {
+  //         // dispatch({ type: "SET_WORD_POOL", payload: words });
+
+  //         const firstWord = words[0];
+  //         const remainingWords = words.slice(1);
+  //         dispatch({ type: "SET_WORD_POOL", payload: remainingWords });
+
+  //         dispatch({
+  //           type: "NEW_GAME",
+  //           payload: {
+  //             word: firstWord.word,
+  //             hint: firstWord.hint || "No hint available",
+  //           },
+  //         });
+  //         return;
+  //       }
+  //     } catch (err) {
+  //       console.error("Batch fetch failed:", err);
+  //       // if error then I just fall through to static words
+  //     }
+
+  //     // fallback to static words
+  //     getNextWord();
+  //   };
+
+  //   // Only fetch when we need a new word
+  //   const shouldFetchWord =
+  //     state.gameStatus === "loading" && state.currentWord === "";
+
+  //   if (shouldFetchWord) {
+  //     if (state.wordPool.length <= 5) {
+  //       fetchWordBatch();
+  //     } else {
+  //       getNextWord();
+  //     }
+  //   }
+  // }, [
+  //   state.currentWord,
+  //   state.gameStatus,
+  //   state.difficulty,
+  //   state.wordPool,
+  //   state.usedStaticWords,
+  // ]);
+
+  // Handle game start - use word from pool or fallback
 
   useEffect(() => {
-    const getNextWord = () => {
+    if (state.gameStatus !== "loading") return;
+
+    const startGame = async () => {
+      // Try to use word from pool first
       if (state.wordPool.length > 0) {
         const wordData = state.wordPool[0];
-
-        //remove the word from pool
-        const newPool = state.wordPool.slice(1);
-        dispatch({ type: "SET_WORD_POOL", payload: newPool });
+        console.log(
+          `Using word from pool: ${wordData.word}. ${
+            state.wordPool.length - 1
+          } remaining`
+        );
 
         dispatch({
           type: "NEW_GAME",
@@ -545,7 +657,41 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      // If pool is empty, get static word with rotation
+      // Pool is empty - try to fetch immediately
+      if (!isFetchingRef.current) {
+        isFetchingRef.current = true;
+
+        try {
+          console.log("Pool empty, fetching words now");
+          const words = await fetchWordsFromWordnik(state.difficulty, 8);
+
+          if (words && words.length > 0) {
+            const firstWord = words[0];
+            const remaining = words.slice(1);
+
+            console.log(
+              `Fetched ${words.length} words, using first, storing ${remaining.length}`
+            );
+            dispatch({ type: "ADD_TO_WORD_POOL", payload: remaining });
+
+            dispatch({
+              type: "NEW_GAME",
+              payload: {
+                word: firstWord.word,
+                hint: firstWord.hint || "No definition available",
+              },
+            });
+            isFetchingRef.current = false;
+            return;
+          }
+        } catch (err) {
+          console.error("Fetch failed, using static word:", err);
+        } finally {
+          isFetchingRef.current = false;
+        }
+      }
+
+      // Final fallback - use static word
       console.log("Using static word fallback");
       try {
         const { staticWord, updatedUsedWords } = getStaticWord(
@@ -571,61 +717,14 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
           type: "NEW_GAME",
           payload: {
             word: "fallback",
-            hint: "Emergency word when all else fails",
+            hint: "Emergency word",
           },
         });
       }
     };
 
-    // fetching words in batch function  for game
-    const fetchWordBatch = async () => {
-      try {
-        const words = await fetchWordsFromWordnik(state.difficulty, 8);
-        console.log("Batch API words received: ", words);
-
-        if (words && words.length > 0) {
-          // dispatch({ type: "SET_WORD_POOL", payload: words });
-
-          const firstWord = words[0];
-          const remainingWords = words.slice(1);
-          dispatch({ type: "SET_WORD_POOL", payload: remainingWords });
-
-          dispatch({
-            type: "NEW_GAME",
-            payload: {
-              word: firstWord.word,
-              hint: firstWord.hint || "No hint available",
-            },
-          });
-          return;
-        }
-      } catch (err) {
-        console.error("Batch fetch failed:", err);
-        // if error then I just fall through to static words
-      }
-
-      // fallback to static words
-      getNextWord();
-    };
-
-    // Only fetch when we need a new word
-    const shouldFetchWord =
-      state.gameStatus === "loading" && state.currentWord === "";
-
-    if (shouldFetchWord) {
-      if (state.wordPool.length <= 5) {
-        fetchWordBatch();
-      } else {
-        getNextWord();
-      }
-    }
-  }, [
-    state.currentWord,
-    state.gameStatus,
-    state.difficulty,
-    state.wordPool,
-    state.usedStaticWords,
-  ]);
+    startGame();
+  }, [state.gameStatus, state.difficulty]);
 
   const value: HangmanContextType = {
     ...state,
