@@ -4,7 +4,6 @@ import React, {
   useEffect,
   useReducer,
   useRef,
-  useState,
   type Dispatch,
 } from "react";
 import { fetchWordsFromWordnik, getStaticWord } from "../FetchFunc";
@@ -198,9 +197,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       };
 
     case "ADD_TO_WORD_POOL": {
-      // Cache word pool to localStorage
-      saveToStorage(`hangman_wordPool_${state.difficulty}`, action.payload);
       const newPool = [...state.wordPool, ...action.payload];
+
+      // Cache word pool to localStorage
+      saveToStorage(`hangman_wordPool_${state.difficulty}`, newPool);
 
       return {
         ...state,
@@ -458,14 +458,12 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  // const [hasLoaded, setHasLoaded] = useState(false);
   const isFetchingRef = useRef(false);
   const hasPrefetchedRef = useRef(false);
 
   // Load from localStorage on mount
   useEffect(() => {
     dispatch({ type: "LOAD_FROM_STORAGE" });
-    // setHasLoaded(true);
   }, []);
 
   // Pre-fetch words on initial load
@@ -503,8 +501,7 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Handle word fetching when pool is low or when starting a game
   useEffect(() => {
-    const shouldFetchMore =
-      state.wordPool.length > 0 && state.wordPool.length <= 3;
+    const shouldFetchMore = state.wordPool.length <= 3;
 
     if (shouldFetchMore && !isFetchingRef.current) {
       const fetchMore = async () => {
@@ -724,7 +721,12 @@ const HangmanProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     startGame();
-  }, [state.gameStatus, state.difficulty]);
+  }, [
+    state.difficulty,
+    state.gameStatus,
+    state.usedStaticWords,
+    state.wordPool,
+  ]);
 
   const value: HangmanContextType = {
     ...state,
